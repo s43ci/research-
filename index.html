@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -456,16 +455,13 @@
         </footer>
     </div>
 
-    <!-- مكتبات خارجية -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.0/build/index.min.js"></script>
+    <!-- مكتبة html-docx-js لإنشاء ملفات Word -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     
     <script>
         // البيانات والمتغيرات
         let addedTexts = [];
         let currentLanguage = 'ar';
-        let headingCounter = { main: 1, sub: 0 };
         
         // عناصر DOM
         const contentInput = document.getElementById('contentInput');
@@ -516,7 +512,6 @@
             
             if (confirm('هل أنت متأكد من مسح جميع النصوص؟')) {
                 addedTexts = [];
-                headingCounter = { main: 1, sub: 0 };
                 updateUI();
             }
         });
@@ -552,7 +547,7 @@
                     const heading = {
                         number: headingNumber,
                         text: headingText,
-                        page: 1, // سيتم حساب الصفحات لاحقاً
+                        page: 1,
                         language: lang
                     };
                     
@@ -649,12 +644,12 @@
                 
                 if (isRTL) {
                     tocHTML = `
-                        <table class="toc-table" dir="rtl">
+                        <table class="toc-table" dir="rtl" style="width:100%; border-collapse:collapse;">
                             <thead>
                                 <tr>
-                                    <th>ت</th>
-                                    <th>المحتويات</th>
-                                    <th>رقم الصفحة</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">ت</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">المحتويات</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">رقم الصفحة</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -663,9 +658,9 @@
                     allHeadings.forEach((heading, index) => {
                         tocHTML += `
                             <tr>
-                                <td>${heading.number}</td>
-                                <td>${heading.text}</td>
-                                <td>${heading.page}</td>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.number}</td>
+                                <td style="border:1px solid #ddd; padding:8px;">${heading.text}</td>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.page}</td>
                             </tr>
                         `;
                     });
@@ -673,12 +668,12 @@
                     tocHTML += `</tbody></table>`;
                 } else {
                     tocHTML = `
-                        <table class="toc-table" dir="ltr">
+                        <table class="toc-table" dir="ltr" style="width:100%; border-collapse:collapse;">
                             <thead>
                                 <tr>
-                                    <th>Page No</th>
-                                    <th>Contents</th>
-                                    <th>No.</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">Page No</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">Contents</th>
+                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">No.</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -687,9 +682,9 @@
                     allHeadings.forEach((heading, index) => {
                         tocHTML += `
                             <tr>
-                                <td>${heading.page}</td>
-                                <td>${heading.text}</td>
-                                <td>${heading.number}</td>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.page}</td>
+                                <td style="border:1px solid #ddd; padding:8px;">${heading.text}</td>
+                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.number}</td>
                             </tr>
                         `;
                     });
@@ -708,18 +703,16 @@
             addedTexts.forEach(text => {
                 const isRTL = text.language === 'ar';
                 const contentClass = isRTL ? 'arabic-content' : 'english-content';
+                const textAlign = isRTL ? 'right' : 'left';
+                const direction = isRTL ? 'rtl' : 'ltr';
                 
-                contentHTML += `<div class="${contentClass}">`;
+                contentHTML += `<div style="direction:${direction}; text-align:${textAlign}; margin-bottom:20px;">`;
                 
                 // تجميع جميع المحتوى مع العناوين
-                const allContent = [];
-                
-                // إضافة العناوين والفقرات بالنظام
                 let contentIndex = 0;
                 let headingIndex = 0;
                 let bulletIndex = 0;
                 
-                // معالجة الفقرات والعناوين بالترتيب
                 while (contentIndex < text.parsedContent.paragraphs.length || 
                        headingIndex < text.parsedContent.headings.length ||
                        bulletIndex < text.parsedContent.bulletPoints.length) {
@@ -727,18 +720,22 @@
                     // إذا كان هناك عنوان في هذا الموقع
                     if (headingIndex < text.parsedContent.headings.length) {
                         const heading = text.parsedContent.headings[headingIndex];
-                        contentHTML += `<div class="preview-heading">${heading.number}. ${heading.text}</div>`;
+                        contentHTML += `<div style="font-weight:bold; font-size:14pt; font-family:'Times New Roman'; margin-top:15px; margin-bottom:5px;">
+                            ${heading.number}. ${heading.text}
+                        </div>`;
                         headingIndex++;
                     }
                     
-                    // إضافة الفقرات المرتبطة بالعنوان الحالي
+                    // الحصول على العنوان الحالي
                     const currentHeading = headingIndex > 0 ? text.parsedContent.headings[headingIndex-1]?.number : null;
                     
                     // إضافة الفقرات العادية المرتبطة بهذا العنوان
                     while (contentIndex < text.parsedContent.paragraphs.length && 
                            text.parsedContent.paragraphs[contentIndex].heading === currentHeading) {
                         const para = text.parsedContent.paragraphs[contentIndex];
-                        contentHTML += `<div class="preview-paragraph indented">${para.text}</div>`;
+                        contentHTML += `<div style="font-size:14pt; font-family:'Times New Roman'; margin-bottom:8px; text-align:justify; text-indent:${isRTL ? '-0.5in' : '0.5in'};">
+                            ${para.text}
+                        </div>`;
                         contentIndex++;
                     }
                     
@@ -751,15 +748,15 @@
                     }
                     
                     if (bulletItems.length > 0) {
-                        contentHTML += '<ul class="preview-list">';
+                        contentHTML += `<ul style="padding-${isRTL ? 'right' : 'left'}:20px; margin-bottom:8px;">`;
                         bulletItems.forEach(bullet => {
-                            contentHTML += `<li>${bullet}</li>`;
+                            contentHTML += `<li style="font-size:14pt; font-family:'Times New Roman'; margin-bottom:5px;">${bullet}</li>`;
                         });
                         contentHTML += '</ul>';
                     }
                 }
                 
-                contentHTML += `</div><hr style="margin: 20px 0; opacity: 0.5;">`;
+                contentHTML += `</div><hr style="margin:20px 0; opacity:0.5;">`;
             });
             
             contentPreview.innerHTML = contentHTML;
@@ -777,24 +774,30 @@
                 exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
                 exportBtn.disabled = true;
                 
-                // استيراد مكتبة docx ديناميكياً
-                const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, AlignmentType, BorderStyle } = window.docx;
-                
-                // إنشاء مستند جديد
-                const doc = new Document();
-                
-                // إضافة عنوان المستند
-                doc.addSection({
-                    properties: {},
-                    children: [
-                        new Paragraph({
-                            text: "مستند منظم مع جدول المحتويات",
-                            heading: HeadingLevel.TITLE,
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 }
-                        })
-                    ]
-                });
+                // إنشاء محتوى HTML للمستند
+                let docContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: 'Times New Roman', serif; }
+                        .title { text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 40pt; }
+                        .toc-title { text-align: center; font-size: 14pt; font-weight: bold; margin: 30pt 0 20pt 0; }
+                        .section-title { text-align: center; font-size: 14pt; font-weight: bold; margin: 30pt 0 20pt 0; }
+                        .heading { font-weight: bold; font-size: 14pt; margin-top: 20pt; margin-bottom: 10pt; }
+                        .paragraph { font-size: 14pt; margin-bottom: 8pt; text-align: justify; }
+                        .list { margin-bottom: 8pt; }
+                        .list-item { font-size: 14pt; margin-bottom: 5pt; }
+                        table { width: 100%; border-collapse: collapse; margin: 20pt 0; }
+                        th, td { border: 1px solid black; padding: 8pt; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        .page-break { page-break-before: always; }
+                    </style>
+                </head>
+                <body>
+                    <div class="title">مستند منظم مع جدول المحتويات</div>
+                `;
                 
                 // إضافة جدول المحتويات
                 let allHeadings = [];
@@ -806,92 +809,73 @@
                     const primaryLang = addedTexts[0].language;
                     const isRTL = primaryLang === 'ar';
                     
-                    // إضافة عنوان جدول المحتويات
-                    doc.addSection({
-                        properties: {},
-                        children: [
-                            new Paragraph({
-                                text: isRTL ? "جدول المحتويات" : "Table of Contents",
-                                heading: HeadingLevel.HEADING_1,
-                                alignment: AlignmentType.CENTER,
-                                spacing: { before: 400, after: 400 }
-                            })
-                        ]
-                    });
+                    docContent += `<div class="toc-title">${isRTL ? 'جدول المحتويات' : 'Table of Contents'}</div>`;
                     
-                    // إنشاء جدول المحتويات
-                    const tableRows = [];
-                    
-                    // رأس الجدول
                     if (isRTL) {
-                        tableRows.push(
-                            new TableRow({
-                                children: [
-                                    new TableCell({ children: [new Paragraph({ text: "ت", alignment: AlignmentType.CENTER })] }),
-                                    new TableCell({ children: [new Paragraph({ text: "المحتويات", alignment: AlignmentType.CENTER })] }),
-                                    new TableCell({ children: [new Paragraph({ text: "رقم الصفحة", alignment: AlignmentType.CENTER })] })
-                                ]
-                            })
-                        );
+                        docContent += `
+                        <table dir="rtl">
+                            <thead>
+                                <tr>
+                                    <th>ت</th>
+                                    <th>المحتويات</th>
+                                    <th>رقم الصفحة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        `;
+                        
+                        allHeadings.forEach(heading => {
+                            docContent += `
+                            <tr>
+                                <td style="text-align:center;">${heading.number}</td>
+                                <td>${heading.text}</td>
+                                <td style="text-align:center;">${heading.page}</td>
+                            </tr>
+                            `;
+                        });
+                        
+                        docContent += `</tbody></table>`;
                     } else {
-                        tableRows.push(
-                            new TableRow({
-                                children: [
-                                    new TableCell({ children: [new Paragraph({ text: "Page No", alignment: AlignmentType.CENTER })] }),
-                                    new TableCell({ children: [new Paragraph({ text: "Contents", alignment: AlignmentType.CENTER })] }),
-                                    new TableCell({ children: [new Paragraph({ text: "No.", alignment: AlignmentType.CENTER })] })
-                                ]
-                            })
-                        );
+                        docContent += `
+                        <table dir="ltr">
+                            <thead>
+                                <tr>
+                                    <th>Page No</th>
+                                    <th>Contents</th>
+                                    <th>No.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        `;
+                        
+                        allHeadings.forEach(heading => {
+                            docContent += `
+                            <tr>
+                                <td style="text-align:center;">${heading.page}</td>
+                                <td>${heading.text}</td>
+                                <td style="text-align:center;">${heading.number}</td>
+                            </tr>
+                            `;
+                        });
+                        
+                        docContent += `</tbody></table>`;
                     }
                     
-                    // صفوف الجدول
-                    allHeadings.forEach(heading => {
-                        if (isRTL) {
-                            tableRows.push(
-                                new TableRow({
-                                    children: [
-                                        new TableCell({ children: [new Paragraph({ text: heading.number, alignment: AlignmentType.CENTER })] }),
-                                        new TableCell({ children: [new Paragraph({ text: heading.text })] }),
-                                        new TableCell({ children: [new Paragraph({ text: heading.page.toString(), alignment: AlignmentType.CENTER })] })
-                                    ]
-                                })
-                            );
-                        } else {
-                            tableRows.push(
-                                new TableRow({
-                                    children: [
-                                        new TableCell({ children: [new Paragraph({ text: heading.page.toString(), alignment: AlignmentType.CENTER })] }),
-                                        new TableCell({ children: [new Paragraph({ text: heading.text })] }),
-                                        new TableCell({ children: [new Paragraph({ text: heading.number, alignment: AlignmentType.CENTER })] })
-                                    ]
-                                })
-                            );
-                        }
-                    });
-                    
-                    const table = new Table({
-                        rows: tableRows,
-                        width: { size: 100, type: 'pct' }
-                    });
-                    
-                    doc.addSection({
-                        properties: {},
-                        children: [table]
-                    });
-                    
-                    // إضافة فاصل صفحة
-                    doc.addSection({
-                        properties: { pageBreakBefore: true },
-                        children: []
-                    });
+                    docContent += `<div class="page-break"></div>`;
                 }
                 
                 // إضافة المحتوى
-                addedTexts.forEach(text => {
+                addedTexts.forEach((text, textIndex) => {
                     const isRTL = text.language === 'ar';
+                    const direction = isRTL ? 'rtl' : 'ltr';
+                    const textAlign = isRTL ? 'right' : 'left';
                     
-                    // إضافة المحتوى
+                    if (textIndex > 0) {
+                        docContent += `<div class="page-break"></div>`;
+                    }
+                    
+                    docContent += `<div style="direction:${direction}; text-align:${textAlign};">`;
+                    
                     let contentIndex = 0;
                     let headingIndex = 0;
                     let bulletIndex = 0;
@@ -903,26 +887,7 @@
                         // إذا كان هناك عنوان في هذا الموقع
                         if (headingIndex < text.parsedContent.headings.length) {
                             const heading = text.parsedContent.headings[headingIndex];
-                            
-                            // إضافة العنوان
-                            doc.addSection({
-                                properties: {},
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: `${heading.number}. ${heading.text}`,
-                                                bold: true,
-                                                size: 28, // 14pt * 2
-                                                font: "Times New Roman"
-                                            })
-                                        ],
-                                        alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                                        spacing: { after: 240 } // سطر فارغ
-                                    })
-                                ]
-                            });
-                            
+                            docContent += `<div class="heading">${heading.number}. ${heading.text}</div>`;
                             headingIndex++;
                         }
                         
@@ -933,25 +898,8 @@
                         while (contentIndex < text.parsedContent.paragraphs.length && 
                                text.parsedContent.paragraphs[contentIndex].heading === currentHeading) {
                             const para = text.parsedContent.paragraphs[contentIndex];
-                            
-                            doc.addSection({
-                                properties: {},
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: para.text,
-                                                size: 28, // 14pt * 2
-                                                font: "Times New Roman"
-                                            })
-                                        ],
-                                        alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                                        indent: { firstLine: 720 }, // 0.5 بوصة
-                                        spacing: { line: isRTL ? 360 : 276 } // 1.5 أو 1.15 تباعد
-                                    })
-                                ]
-                            });
-                            
+                            const indentStyle = isRTL ? 'margin-right: 0.5in;' : 'margin-left: 0.5in;';
+                            docContent += `<div class="paragraph" style="${indentStyle}">${para.text}</div>`;
                             contentIndex++;
                         }
                         
@@ -964,39 +912,28 @@
                         }
                         
                         if (bulletItems.length > 0) {
+                            docContent += `<ul class="list" style="padding-${isRTL ? 'right' : 'left'}: 20pt;">`;
                             bulletItems.forEach(bullet => {
-                                doc.addSection({
-                                    properties: {},
-                                    children: [
-                                        new Paragraph({
-                                            children: [
-                                                new TextRun({
-                                                    text: `• ${bullet}`,
-                                                    size: 28, // 14pt * 2
-                                                    font: "Times New Roman"
-                                                })
-                                            ],
-                                            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-                                            spacing: { line: isRTL ? 360 : 276 } // 1.5 أو 1.15 تباعد
-                                        })
-                                    ]
-                                });
+                                docContent += `<li class="list-item">${bullet}</li>`;
                             });
+                            docContent += '</ul>';
                         }
                     }
                     
-                    // إضافة فاصل صفحة بين النصوص المختلفة
-                    if (addedTexts.indexOf(text) < addedTexts.length - 1) {
-                        doc.addSection({
-                            properties: { pageBreakBefore: true },
-                            children: []
-                        });
-                    }
+                    docContent += `</div>`;
                 });
                 
-                // إنشاء الملف وتنزيله
-                const blob = await Packer.toBlob(doc);
-                saveAs(blob, "مستند_منظم.docx");
+                docContent += `</body></html>`;
+                
+                // تحويل HTML إلى مستند Word
+                const converted = htmlDocx.asBlob(docContent, {
+                    orientation: 'portrait',
+                    margins: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
+                });
+                
+                // حفظ الملف
+                const filename = `مستند_منظم_${new Date().toISOString().slice(0,10)}.docx`;
+                saveAs(converted, filename);
                 
             } catch (error) {
                 console.error('خطأ في التصدير:', error);
@@ -1008,7 +945,7 @@
             }
         });
         
-        // مثال توضيحي للنصوص
+        // مثال توضيحي
         function loadExample() {
             const arabicExample = `1.1 مقدمة عن البرمجة
 البرمجة هي عملية كتابة تعليمات وتوجيه أوامر لجهاز الحاسوب أو أي جهاز آخر.
@@ -1029,31 +966,12 @@
 2.2 تطبيقات الذكاء الاصطناعي
 يتضمن الذكاء الاصطناعي العديد من التطبيقات العملية.`;
 
-            const englishExample = `1.1 Introduction to Programming
-Programming is the process of writing instructions and commands for a computer or any other device.
-
-1.2 Types of Programming Languages
-There are many programming languages that differ in their uses and levels.
-
-Advantages of high-level programming languages:
-- Easy to learn and use
-- High productivity in software development
-- Support for libraries and frameworks
-
-Python is a high-level programming language.
-
-2.1 Artificial Intelligence
-Artificial intelligence is a branch of computer science.
-
-2.2 Applications of Artificial Intelligence
-Artificial intelligence includes many practical applications.`;
-
             contentInput.value = arabicExample;
         }
         
-        // تحميل مثال عند فتح الصفحة (يمكن إزالته)
+        // تحميل مثال عند فتح الصفحة
         window.addEventListener('DOMContentLoaded', () => {
-            // loadExample(); // إلغاء التعليق لتحميل مثال تلقائي
+            loadExample();
         });
         
         // تهيئة التطبيق
