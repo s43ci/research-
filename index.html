@@ -3,979 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منشئ مستند Word مع جدول المحتويات</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>واثِق - نظام جمع البيانات الذكي</title>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --light-bg: #f8f9fa;
-            --dark-text: #333;
-            --border-color: #ddd;
-            --success-color: #27ae60;
+            --primary: #2c3e50;
+            --secondary: #2980b9;
+            --accent: #27ae60;
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --error: #e74c3c;
+            --warning: #f39c12;
         }
 
         body {
-            background-color: #f5f7fa;
-            color: var(--dark-text);
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
             padding: 20px;
-            min-height: 100vh;
+            color: var(--primary);
+            line-height: 1.6;
+            padding-bottom: 80px; /* مساحة للأزرار العائمة في الموبايل */
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        header {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        h1 i {
-            font-size: 32px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        main {
-            display: flex;
-            flex-wrap: wrap;
-            min-height: 600px;
-        }
-
-        .input-section, .preview-section {
-            flex: 1;
-            min-width: 300px;
+            background: var(--white);
             padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
-        .input-section {
-            border-left: 1px solid var(--border-color);
-        }
-
-        .section-title {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--secondary-color);
+        /* شريط التحكم العلوي */
+        .top-bar {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .section-title i {
-            color: var(--secondary-color);
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        textarea {
-            width: 100%;
-            height: 180px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            font-size: 16px;
-            resize: vertical;
-            transition: border 0.3s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .language-selector {
+        .settings-group {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
         }
 
-        .language-option {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 5px;
+        .settings-group input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             text-align: center;
+            font-weight: bold;
+        }
+
+        .reset-btn {
+            background-color: var(--error);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
+            font-size: 0.9em;
         }
 
-        .language-option:hover {
-            background-color: #f0f8ff;
-        }
-
-        .language-option.selected {
-            border-color: var(--secondary-color);
-            background-color: #e8f4fc;
-            color: var(--secondary-color);
-        }
-
-        .buttons {
+        /* شريط التقدم */
+        .progress-header {
+            background: linear-gradient(45deg, var(--secondary), #3498db);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 25px;
             display: flex;
-            gap: 15px;
-            margin-top: 25px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* تصميم الأسئلة */
+        .question-block {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #e1e4e8;
+            border-radius: 10px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .question-block.unanswered {
+            border: 2px solid var(--error);
+            background-color: #fdf2f2;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .q-text {
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: block;
+            font-size: 1.05em;
+        }
+
+        /* تكبير مساحة الضغط */
+        .options-grid label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .options-grid label:hover {
+            background: #e9ecef;
+        }
+
+        /* ستايل عند الاختيار */
+        .options-grid input[type="radio"]:checked + span {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .options-grid input[type="radio"]:checked + span::before {
+             /* يمكن إضافة أيقونة هنا */
+        }
+
+        .options-grid label:has(input:checked) {
+            background-color: #eaf6ff;
+            border-color: var(--secondary);
+        }
+
+        input[type="radio"] {
+            transform: scale(1.5);
+            margin-left: 15px;
+            accent-color: var(--secondary);
+        }
+
+        /* أزرار التحكم السفلية */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
         }
 
         .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
             flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s;
         }
 
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
+        .btn:active { transform: scale(0.98); }
 
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
+        .btn-next { background-color: var(--secondary); color: white; }
+        .btn-prev { background-color: #95a5a6; color: white; }
+        .btn-clear { background-color: #e74c3c; color: white; opacity: 0.8; max-width: 150px;}
 
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #219653;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: #7f8c8d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #6c7b7d;
-        }
-
-        .added-texts {
-            margin-top: 30px;
-        }
-
-        .text-item {
-            background-color: var(--light-bg);
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-right: 4px solid var(--secondary-color);
-        }
-
-        .text-item-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .text-lang {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .text-lang.arabic {
-            background-color: #8e44ad;
-        }
-
-        .text-lang.english {
-            background-color: #16a085;
-        }
-
-        .text-content {
-            max-height: 100px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.5;
-            padding: 10px;
-            background-color: white;
-            border-radius: 3px;
-        }
-
-        .remove-btn {
-            background-color: transparent;
-            color: var(--accent-color);
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .preview-content {
-            height: 500px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-
-        .preview-title {
+        /* قسم التصدير */
+        #export-section {
+            display: none;
             text-align: center;
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: var(--primary-color);
+            padding: 40px;
+        }
+        
+        .success-icon {
+            font-size: 50px;
+            color: var(--accent);
+            margin-bottom: 20px;
         }
 
-        .toc-preview {
-            margin-bottom: 30px;
-            border: 1px dashed var(--border-color);
-            padding: 15px;
-            background-color: white;
-        }
-
-        .toc-table {
+        .export-btn {
+            display: block;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .toc-table th, .toc-table td {
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .toc-table th {
-            background-color: #f2f2f2;
-        }
-
-        .content-preview {
-            font-family: 'Times New Roman', serif;
-        }
-
-        .preview-heading {
-            font-size: 14px;
+            max-width: 300px;
+            margin: 10px auto;
+            padding: 15px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
             font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            color: #2c3e50;
+            cursor: pointer;
+            border: none;
         }
 
-        .preview-paragraph {
-            font-size: 14px;
-            margin-bottom: 8px;
-            text-align: justify;
-        }
+        .btn-excel { background-color: #217346; }
+        .btn-word { background-color: #2b579a; }
 
-        .preview-list {
-            padding-right: 20px;
-            margin-bottom: 8px;
-        }
-
-        .preview-list li {
-            margin-bottom: 5px;
-        }
-
-        .arabic-content {
-            direction: rtl;
-            text-align: right;
-        }
-
-        .english-content {
-            direction: ltr;
-            text-align: left;
-        }
-
-        .indented {
-            padding-right: 20px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            font-size: 14px;
-        }
-
-        .empty-message {
-            text-align: center;
-            color: #7f8c8d;
-            padding: 40px 20px;
-            font-style: italic;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-            font-size: 14px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            main {
-                flex-direction: column;
-            }
-            
-            .input-section {
-                border-left: none;
-                border-top: 1px solid var(--border-color);
-            }
-            
-            .buttons {
-                flex-direction: column;
-            }
+        /* رسائل التنبيه */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-file-word"></i> منشئ مستند Word مع جدول المحتويات</h1>
-            <p class="subtitle">أدخل النصوص، اختر اللغة، وقم بإنشاء مستند Word منظم وجاهز للطباعة</p>
-        </header>
+
+<div class="container">
+    <div class="top-bar">
+        <div>
+            <h2 style="margin:0; color:var(--primary);">نظام واثِق</h2>
+        </div>
         
-        <main>
-            <section class="input-section">
-                <h2 class="section-title"><i class="fas fa-edit"></i> إدخال المحتوى</h2>
-                
-                <div class="input-group">
-                    <label for="contentInput">النص الكامل:</label>
-                    <textarea id="contentInput" placeholder="الصق النص الكامل هنا..."></textarea>
-                </div>
-                
-                <div class="input-group">
-                    <label>لغة المحتوى:</label>
-                    <div class="language-selector">
-                        <div class="language-option selected" data-lang="ar">
-                            <i class="fas fa-language"></i> عربي
-                        </div>
-                        <div class="language-option" data-lang="en">
-                            <i class="fas fa-language"></i> English
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="buttons">
-                    <button class="btn btn-primary" id="addBtn">
-                        <i class="fas fa-plus"></i> إضافة النص
-                    </button>
-                    <button class="btn btn-secondary" id="clearBtn">
-                        <i class="fas fa-trash"></i> مسح الكل
-                    </button>
-                </div>
-                
-                <div class="added-texts">
-                    <h3 class="section-title"><i class="fas fa-list"></i> النصوص المضافة</h3>
-                    <div id="textsContainer">
-                        <div class="empty-message">لم تتم إضافة أي نصوص بعد. أضف النص الأول باستخدام الزر أعلاه.</div>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="preview-section">
-                <h2 class="section-title"><i class="fas fa-eye"></i> معاينة المستند</h2>
-                
-                <div class="preview-content">
-                    <div class="preview-title">معاينة جدول المحتويات</div>
-                    <div id="tocPreview" class="toc-preview">
-                        <div class="empty-message">سيظهر جدول المحتويات هنا بعد إضافة النصوص</div>
-                    </div>
-                    
-                    <div class="preview-title">معاينة المحتوى</div>
-                    <div id="contentPreview" class="content-preview">
-                        <div class="empty-message">سيظهر محتوى المستند هنا بعد إضافة النصوص</div>
-                    </div>
-                </div>
-                
-                <div class="stats" id="stats">
-                    <div>عدد النصوص: <span id="textCount">0</span></div>
-                    <div>عدد العناوين: <span id="headingCount">0</span></div>
-                    <div>عدد الفقرات: <span id="paragraphCount">0</span></div>
-                </div>
-                
-                <div class="buttons">
-                    <button class="btn btn-success" id="exportBtn">
-                        <i class="fas fa-file-export"></i> تصدير إلى Word
-                    </button>
-                </div>
-            </section>
-        </main>
-        
-        <footer>
-            <p>تم التطوير باستخدام HTML, CSS و JavaScript | يدعم مستندات Word المنسقة تلقائياً</p>
-        </footer>
+        <div class="settings-group">
+            <label for="target-samples">عدد العينات الكلي:</label>
+            <input type="number" id="target-samples" value="40" min="2" onchange="updateTargetSamples()">
+        </div>
+
+        <button class="reset-btn" onclick="hardReset()">⚠️ تصفير وبدء جديد</button>
     </div>
 
-    <!-- مكتبة html-docx-js لإنشاء ملفات Word -->
-    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
-    
-    <script>
-        // البيانات والمتغيرات
-        let addedTexts = [];
-        let currentLanguage = 'ar';
+    <div id="survey-view">
+        <div class="progress-header">
+            <span>عينة رقم: <span id="current-display" style="font-size:1.4em; color:#fff;">1</span></span>
+            <span style="font-size:0.8em; opacity:0.9;">من أصل <span id="total-display">40</span></span>
+        </div>
+
+        <form id="mainForm">
+            <div id="questions-area"></div>
+        </form>
+
+        <div class="action-bar">
+            <button class="btn btn-prev" onclick="prevSample()" id="btn-prev" disabled>السابق</button>
+            <button class="btn btn-clear" onclick="clearCurrentSample()">مسح العينة</button>
+            <button class="btn btn-next" onclick="nextSample()" id="btn-next">التالي وحفظ</button>
+        </div>
+    </div>
+
+    <div id="export-section">
+        <div class="success-icon">✔</div>
+        <h2>تم إكمال جميع العينات بنجاح!</h2>
+        <p>البيانات جاهزة للتصدير</p>
         
-        // عناصر DOM
-        const contentInput = document.getElementById('contentInput');
-        const languageOptions = document.querySelectorAll('.language-option');
-        const addBtn = document.getElementById('addBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const textsContainer = document.getElementById('textsContainer');
-        const tocPreview = document.getElementById('tocPreview');
-        const contentPreview = document.getElementById('contentPreview');
-        const textCountElem = document.getElementById('textCount');
-        const headingCountElem = document.getElementById('headingCount');
-        const paragraphCountElem = document.getElementById('paragraphCount');
-        
-        // اختيار اللغة
-        languageOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                languageOptions.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                currentLanguage = option.getAttribute('data-lang');
-            });
-        });
-        
-        // إضافة نص
-        addBtn.addEventListener('click', () => {
-            const content = contentInput.value.trim();
-            if (!content) {
-                alert('الرجاء إدخال نص أولاً');
-                return;
-            }
-            
-            const textId = Date.now();
-            const textItem = {
-                id: textId,
-                content: content,
-                language: currentLanguage,
-                parsedContent: parseContent(content, currentLanguage)
-            };
-            
-            addedTexts.push(textItem);
-            updateUI();
-            contentInput.value = '';
-        });
-        
-        // مسح الكل
-        clearBtn.addEventListener('click', () => {
-            if (addedTexts.length === 0) return;
-            
-            if (confirm('هل أنت متأكد من مسح جميع النصوص؟')) {
-                addedTexts = [];
-                updateUI();
-            }
-        });
-        
-        // حذف نص معين
-        function removeText(id) {
-            addedTexts = addedTexts.filter(text => text.id !== id);
-            updateUI();
+        <button class="export-btn btn-excel" onclick="exportExcel()">تحميل ملف Excel (.xlsx)</button>
+        <button class="export-btn btn-word" onclick="exportWord()">تحميل ملف Word (.docx)</button>
+        <br>
+        <button class="btn btn-prev" onclick="returnToSurvey()" style="background:#7f8c8d; max-width:200px;">عودة لمراجعة البيانات</button>
+    </div>
+</div>
+
+<div id="toast" class="toast">تم الحفظ تلقائياً</div>
+
+<script>
+    // --- هيكلية البيانات والأسئلة ---
+    // 0 = المجموعة الأولى (نعم/صح...)
+    // 1 = المجموعة الثانية (لا/خطأ...)
+    // 2 = المجموعة الثالثة (أحياناً/لا أعلم...)
+    const structure = [
+        {
+            title: "القسم الأول: البيانات الديموغرافية",
+            qs: [
+                {t:"1. العمر:", o:["أقل من 20 سنة", "20 - 29 سنة", "30 - 39 سنة", "40 سنة فأكثر"]},
+                {t:"2. المستوى التعليمي:", o:["أمية", "ابتدائية", "متوسطة", "إعدادية", "جامعية فأعلى"]},
+                {t:"3. الحالة الوظيفية:", o:["ربة بيت", "موظفة", "عاملة / أخرى"]},
+                {t:"4. عدد مرات الحمل السابقة:", o:["حمل واحد", "2 - 3 مرات", "أكثر من 3 مرات"]},
+                {t:"5. هل سبق لكِ التعرض لولادة مبكرة؟", o:["نعم", "لا"]}
+            ]
+        },
+        {
+            title: "القسم الثاني: مستوى المعرفة",
+            qs: [
+                {t:"1. الولادة المبكرة تحدث قبل الأسبوع 37:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"2. قلة المتابعة الطبية تزيد الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"3. فقر الدم قد يؤدي للولادة المبكرة:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"4. الالتهابات البولية تسبب ولادة مبكرة:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"5. التدخين يزيد الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"6. الولادة المبكرة لا تؤثر على المولود:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"7. ارتفاع الضغط من عوامل الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"8. التغذية الجيدة تقلل الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"9. الحمل المتقارب يزيد الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"10. الإجهاد النفسي قد يؤدي لولادة مبكرة:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"11. المتابعة المبكرة تقلل المضاعفات:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"12. النزف المهبلي مؤشر خطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"13. سوء التغذية يزيد الخطر:", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"14. الراحة ليس لها دور (نفي):", o:["صح", "خطأ", "لا أعلم"]},
+                {t:"15. المتابعة المنتظمة تكتشف العلامات مبكراً:", o:["صح", "خطأ", "لا أعلم"]}
+            ]
+        },
+        {
+            title: "القسم الثالث: الالتزام بالمراجعات",
+            qs: [
+                {t:"1. هل تلتزمين بالمراجعات الدورية؟", o:["دائماً", "لا ألتزم", "أحياناً"]}, // ترتيب القيم 0,1,2 حسب طلبك
+                {t:"2. كم مرة تراجعين؟", o:["حسب التعليمات", "أقل من المطلوب", "عند التعب فقط"]},
+                {t:"3. إجراء الفحوصات المطلوبة؟", o:["نعم دائماً", "لا", "أحياناً"]},
+                {t:"4. هل يشرح لك الكادر المخاطر؟", o:["نعم", "لا", "أحياناً"]},
+                {t:"5. هل المراجعات تقلل الخطر؟", o:["نعم", "لا", "لا أعلم"]},
+                {t:"6. سبب عدم الانتظام؟", o:["بعد/وقت", "قلة وعي", "مادية"]},
+                {t:"7. متى بدأت أول مراجعة؟", o:["الثلث الأول", "الثلث الثاني", "الثلث الثالث"]},
+                {t:"8. الالتزام بتعليمات الطبيب؟", o:["نعم دائماً", "لا", "أحياناً"]},
+                {t:"9. قياس ضغط الدم بانتظام؟", o:["نعم", "لا", "أحياناً"]},
+                {t:"10. متابعة الهيموغلوبين؟", o:["نعم", "لا", "أحياناً"]},
+                {t:"11. مراجعة فور الأعراض؟", o:["نعم", "لا", "أحياناً"]},
+                {t:"12. حصلتِ على تثقيف صحي؟", o:["نعم", "لا", "أحياناً"]}
+            ]
         }
-        
-        // تحليل النص - معدل للتعرف على العناوين فقط التي تبدأ بأرقام
-        function parseContent(content, lang) {
-            const lines = content.split('\n').filter(line => line.trim() !== '');
-            const parsed = {
-                headings: [],
-                paragraphs: [],
-                bulletPoints: []
-            };
-            
-            let currentHeadingNumber = null;
-            
-            lines.forEach(line => {
-                const trimmedLine = line.trim();
-                
-                // التحقق إذا كان السطر عنواناً (يبدأ برقم مثل 1.1 أو 2.3.1 أو 1)
-                const headingMatch = trimmedLine.match(/^(\d+(?:\.\d+)*)[\.\s]+(.+)$/);
-                
-                if (headingMatch) {
-                    // هذا عنوان
-                    const headingNumber = headingMatch[1];
-                    const headingText = headingMatch[2].trim();
-                    
-                    const heading = {
-                        number: headingNumber,
-                        text: headingText,
-                        page: 1,
-                        language: lang
-                    };
-                    
-                    parsed.headings.push(heading);
-                    currentHeadingNumber = headingNumber;
-                    
-                } else if (trimmedLine.includes(':') && !trimmedLine.match(/^[\d\.]+/)) {
-                    // فقرة نقطية (تحتوي على نقطتين ولكنها ليست عنواناً مرقماً)
-                    parsed.bulletPoints.push({
-                        text: trimmedLine,
-                        heading: currentHeadingNumber,
-                        language: lang
-                    });
-                } else {
-                    // فقرة عادية
-                    parsed.paragraphs.push({
-                        text: trimmedLine,
-                        heading: currentHeadingNumber,
-                        language: lang
-                    });
-                }
-            });
-            
-            return parsed;
-        }
-        
-        // تحديث واجهة المستخدم
-        function updateUI() {
-            // تحديث قائمة النصوص المضافة
-            if (addedTexts.length === 0) {
-                textsContainer.innerHTML = '<div class="empty-message">لم تتم إضافة أي نصوص بعد. أضف النص الأول باستخدام الزر أعلاه.</div>';
-            } else {
-                textsContainer.innerHTML = '';
-                addedTexts.forEach(text => {
-                    const textElement = document.createElement('div');
-                    textElement.className = 'text-item';
-                    
-                    const shortContent = text.content.length > 150 ? text.content.substring(0, 150) + '...' : text.content;
-                    
-                    textElement.innerHTML = `
-                        <div class="text-item-header">
-                            <span class="text-lang ${text.language === 'ar' ? 'arabic' : 'english'}">
-                                ${text.language === 'ar' ? 'عربي' : 'English'}
-                            </span>
-                            <button class="remove-btn" onclick="removeText(${text.id})">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="text-content">${shortContent}</div>
-                    `;
-                    
-                    textsContainer.appendChild(textElement);
-                });
-            }
-            
-            // تحديث الإحصائيات
-            textCountElem.textContent = addedTexts.length;
-            
-            let totalHeadings = 0;
-            let totalParagraphs = 0;
-            
-            addedTexts.forEach(text => {
-                totalHeadings += text.parsedContent.headings.length;
-                totalParagraphs += text.parsedContent.paragraphs.length + text.parsedContent.bulletPoints.length;
-            });
-            
-            headingCountElem.textContent = totalHeadings;
-            paragraphCountElem.textContent = totalParagraphs;
-            
-            // تحديث المعاينة
-            updatePreview();
-        }
-        
-        // تحديث المعاينة
-        function updatePreview() {
-            if (addedTexts.length === 0) {
-                tocPreview.innerHTML = '<div class="empty-message">سيظهر جدول المحتويات هنا بعد إضافة النصوص</div>';
-                contentPreview.innerHTML = '<div class="empty-message">سيظهر محتوى المستند هنا بعد إضافة النصوص</div>';
-                return;
-            }
-            
-            // إنشاء جدول المحتويات في المعاينة
-            let allHeadings = [];
-            addedTexts.forEach(text => {
-                allHeadings = allHeadings.concat(text.parsedContent.headings);
-            });
-            
-            if (allHeadings.length > 0) {
-                let tocHTML = '';
-                
-                // إنشاء جدول المحتويات حسب اللغة الأولى
-                const primaryLang = addedTexts[0].language;
-                const isRTL = primaryLang === 'ar';
-                
-                if (isRTL) {
-                    tocHTML = `
-                        <table class="toc-table" dir="rtl" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">ت</th>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">المحتويات</th>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">رقم الصفحة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-                    
-                    allHeadings.forEach((heading, index) => {
-                        tocHTML += `
-                            <tr>
-                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.number}</td>
-                                <td style="border:1px solid #ddd; padding:8px;">${heading.text}</td>
-                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.page}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    tocHTML += `</tbody></table>`;
-                } else {
-                    tocHTML = `
-                        <table class="toc-table" dir="ltr" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">Page No</th>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">Contents</th>
-                                    <th style="border:1px solid #ddd; padding:8px; background:#f2f2f2;">No.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-                    
-                    allHeadings.forEach((heading, index) => {
-                        tocHTML += `
-                            <tr>
-                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.page}</td>
-                                <td style="border:1px solid #ddd; padding:8px;">${heading.text}</td>
-                                <td style="border:1px solid #ddd; padding:8px; text-align:center;">${heading.number}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    tocHTML += `</tbody></table>`;
-                }
-                
-                tocPreview.innerHTML = tocHTML;
-            } else {
-                tocPreview.innerHTML = '<div class="empty-message">لا توجد عناوين مرقمة في النصوص المضافة</div>';
-            }
-            
-            // إنشاء معاينة المحتوى
-            let contentHTML = '';
-            
-            addedTexts.forEach(text => {
-                const isRTL = text.language === 'ar';
-                const contentClass = isRTL ? 'arabic-content' : 'english-content';
-                const textAlign = isRTL ? 'right' : 'left';
-                const direction = isRTL ? 'rtl' : 'ltr';
-                
-                contentHTML += `<div style="direction:${direction}; text-align:${textAlign}; margin-bottom:20px;">`;
-                
-                // تجميع جميع المحتوى مع العناوين
-                let contentIndex = 0;
-                let headingIndex = 0;
-                let bulletIndex = 0;
-                
-                while (contentIndex < text.parsedContent.paragraphs.length || 
-                       headingIndex < text.parsedContent.headings.length ||
-                       bulletIndex < text.parsedContent.bulletPoints.length) {
-                    
-                    // إذا كان هناك عنوان في هذا الموقع
-                    if (headingIndex < text.parsedContent.headings.length) {
-                        const heading = text.parsedContent.headings[headingIndex];
-                        contentHTML += `<div style="font-weight:bold; font-size:14pt; font-family:'Times New Roman'; margin-top:15px; margin-bottom:5px;">
-                            ${heading.number}. ${heading.text}
-                        </div>`;
-                        headingIndex++;
-                    }
-                    
-                    // الحصول على العنوان الحالي
-                    const currentHeading = headingIndex > 0 ? text.parsedContent.headings[headingIndex-1]?.number : null;
-                    
-                    // إضافة الفقرات العادية المرتبطة بهذا العنوان
-                    while (contentIndex < text.parsedContent.paragraphs.length && 
-                           text.parsedContent.paragraphs[contentIndex].heading === currentHeading) {
-                        const para = text.parsedContent.paragraphs[contentIndex];
-                        contentHTML += `<div style="font-size:14pt; font-family:'Times New Roman'; margin-bottom:8px; text-align:justify; text-indent:${isRTL ? '-0.5in' : '0.5in'};">
-                            ${para.text}
-                        </div>`;
-                        contentIndex++;
-                    }
-                    
-                    // إضافة النقاط المرتبطة بهذا العنوان
-                    const bulletItems = [];
-                    while (bulletIndex < text.parsedContent.bulletPoints.length && 
-                           text.parsedContent.bulletPoints[bulletIndex].heading === currentHeading) {
-                        bulletItems.push(text.parsedContent.bulletPoints[bulletIndex].text);
-                        bulletIndex++;
-                    }
-                    
-                    if (bulletItems.length > 0) {
-                        contentHTML += `<ul style="padding-${isRTL ? 'right' : 'left'}:20px; margin-bottom:8px;">`;
-                        bulletItems.forEach(bullet => {
-                            contentHTML += `<li style="font-size:14pt; font-family:'Times New Roman'; margin-bottom:5px;">${bullet}</li>`;
-                        });
-                        contentHTML += '</ul>';
-                    }
-                }
-                
-                contentHTML += `</div><hr style="margin:20px 0; opacity:0.5;">`;
-            });
-            
-            contentPreview.innerHTML = contentHTML;
-        }
-        
-        // تصدير إلى Word
-        exportBtn.addEventListener('click', async () => {
-            if (addedTexts.length === 0) {
-                alert('لا توجد نصوص لتصديرها. أضف نصًا أولاً.');
-                return;
-            }
-            
-            try {
-                // إظهار رسالة تحميل
-                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
-                exportBtn.disabled = true;
-                
-                // إنشاء محتوى HTML للمستند
-                let docContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        body { font-family: 'Times New Roman', serif; }
-                        .title { text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 40pt; }
-                        .toc-title { text-align: center; font-size: 14pt; font-weight: bold; margin: 30pt 0 20pt 0; }
-                        .section-title { text-align: center; font-size: 14pt; font-weight: bold; margin: 30pt 0 20pt 0; }
-                        .heading { font-weight: bold; font-size: 14pt; margin-top: 20pt; margin-bottom: 10pt; }
-                        .paragraph { font-size: 14pt; margin-bottom: 8pt; text-align: justify; }
-                        .list { margin-bottom: 8pt; }
-                        .list-item { font-size: 14pt; margin-bottom: 5pt; }
-                        table { width: 100%; border-collapse: collapse; margin: 20pt 0; }
-                        th, td { border: 1px solid black; padding: 8pt; }
-                        th { background-color: #f2f2f2; font-weight: bold; }
-                        .page-break { page-break-before: always; }
-                    </style>
-                </head>
-                <body>
-                    <div class="title">مستند منظم مع جدول المحتويات</div>
-                `;
-                
-                // إضافة جدول المحتويات
-                let allHeadings = [];
-                addedTexts.forEach(text => {
-                    allHeadings = allHeadings.concat(text.parsedContent.headings);
-                });
-                
-                if (allHeadings.length > 0) {
-                    const primaryLang = addedTexts[0].language;
-                    const isRTL = primaryLang === 'ar';
-                    
-                    docContent += `<div class="toc-title">${isRTL ? 'جدول المحتويات' : 'Table of Contents'}</div>`;
-                    
-                    if (isRTL) {
-                        docContent += `
-                        <table dir="rtl">
-                            <thead>
-                                <tr>
-                                    <th>ت</th>
-                                    <th>المحتويات</th>
-                                    <th>رقم الصفحة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        `;
-                        
-                        allHeadings.forEach(heading => {
-                            docContent += `
-                            <tr>
-                                <td style="text-align:center;">${heading.number}</td>
-                                <td>${heading.text}</td>
-                                <td style="text-align:center;">${heading.page}</td>
-                            </tr>
-                            `;
-                        });
-                        
-                        docContent += `</tbody></table>`;
-                    } else {
-                        docContent += `
-                        <table dir="ltr">
-                            <thead>
-                                <tr>
-                                    <th>Page No</th>
-                                    <th>Contents</th>
-                                    <th>No.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        `;
-                        
-                        allHeadings.forEach(heading => {
-                            docContent += `
-                            <tr>
-                                <td style="text-align:center;">${heading.page}</td>
-                                <td>${heading.text}</td>
-                                <td style="text-align:center;">${heading.number}</td>
-                            </tr>
-                            `;
-                        });
-                        
-                        docContent += `</tbody></table>`;
-                    }
-                    
-                    docContent += `<div class="page-break"></div>`;
-                }
-                
-                // إضافة المحتوى
-                addedTexts.forEach((text, textIndex) => {
-                    const isRTL = text.language === 'ar';
-                    const direction = isRTL ? 'rtl' : 'ltr';
-                    const textAlign = isRTL ? 'right' : 'left';
-                    
-                    if (textIndex > 0) {
-                        docContent += `<div class="page-break"></div>`;
-                    }
-                    
-                    docContent += `<div style="direction:${direction}; text-align:${textAlign};">`;
-                    
-                    let contentIndex = 0;
-                    let headingIndex = 0;
-                    let bulletIndex = 0;
-                    
-                    while (contentIndex < text.parsedContent.paragraphs.length || 
-                           headingIndex < text.parsedContent.headings.length ||
-                           bulletIndex < text.parsedContent.bulletPoints.length) {
-                        
-                        // إذا كان هناك عنوان في هذا الموقع
-                        if (headingIndex < text.parsedContent.headings.length) {
-                            const heading = text.parsedContent.headings[headingIndex];
-                            docContent += `<div class="heading">${heading.number}. ${heading.text}</div>`;
-                            headingIndex++;
-                        }
-                        
-                        // الحصول على العنوان الحالي
-                        const currentHeading = headingIndex > 0 ? text.parsedContent.headings[headingIndex-1]?.number : null;
-                        
-                        // إضافة الفقرات العادية المرتبطة بهذا العنوان
-                        while (contentIndex < text.parsedContent.paragraphs.length && 
-                               text.parsedContent.paragraphs[contentIndex].heading === currentHeading) {
-                            const para = text.parsedContent.paragraphs[contentIndex];
-                            const indentStyle = isRTL ? 'margin-right: 0.5in;' : 'margin-left: 0.5in;';
-                            docContent += `<div class="paragraph" style="${indentStyle}">${para.text}</div>`;
-                            contentIndex++;
-                        }
-                        
-                        // إضافة النقاط المرتبطة بهذا العنوان
-                        const bulletItems = [];
-                        while (bulletIndex < text.parsedContent.bulletPoints.length && 
-                               text.parsedContent.bulletPoints[bulletIndex].heading === currentHeading) {
-                            bulletItems.push(text.parsedContent.bulletPoints[bulletIndex].text);
-                            bulletIndex++;
-                        }
-                        
-                        if (bulletItems.length > 0) {
-                            docContent += `<ul class="list" style="padding-${isRTL ? 'right' : 'left'}: 20pt;">`;
-                            bulletItems.forEach(bullet => {
-                                docContent += `<li class="list-item">${bullet}</li>`;
-                            });
-                            docContent += '</ul>';
-                        }
-                    }
-                    
-                    docContent += `</div>`;
-                });
-                
-                docContent += `</body></html>`;
-                
-                // تحويل HTML إلى مستند Word
-                const converted = htmlDocx.asBlob(docContent, {
-                    orientation: 'portrait',
-                    margins: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
-                });
-                
-                // حفظ الملف
-                const filename = `مستند_منظم_${new Date().toISOString().slice(0,10)}.docx`;
-                saveAs(converted, filename);
-                
-            } catch (error) {
-                console.error('خطأ في التصدير:', error);
-                alert('حدث خطأ أثناء تصدير الملف. الرجاء المحاولة مرة أخرى.');
-            } finally {
-                // إعادة تعيين زر التصدير
-                exportBtn.innerHTML = '<i class="fas fa-file-export"></i> تصدير إلى Word';
-                exportBtn.disabled = false;
-            }
-        });
-        
-        // مثال توضيحي
-        function loadExample() {
-            const arabicExample = `1.1 مقدمة عن البرمجة
-البرمجة هي عملية كتابة تعليمات وتوجيه أوامر لجهاز الحاسوب أو أي جهاز آخر.
+    ];
 
-1.2 أنواع لغات البرمجة
-هناك العديد من لغات البرمجة التي تختلف في استخداماتها ومستواها.
+    // --- إدارة الحالة (State Management) ---
+    let appState = {
+        target: 40,
+        currentIdx: 0, // يبدأ من 0 (يعني العينة 1)
+        data: [] // مصفوفة تخزن كائنات البيانات
+    };
 
-مزايا لغات البرمجة العالية:
-- سهولة التعلم والاستخدام
-- إنتاجية عالية في تطوير البرمجيات
-- دعم المكتبات والأطر العملية
-
-بايثون هي لغة برمجة عالية المستوى.
-
-2.1 الذكاء الاصطناعي
-الذكاء الاصطناعي هو أحد فروع علم الحاسوب.
-
-2.2 تطبيقات الذكاء الاصطناعي
-يتضمن الذكاء الاصطناعي العديد من التطبيقات العملية.`;
-
-            contentInput.value = arabicExample;
-        }
-        
-        // تحميل مثال عند فتح الصفحة
-        window.addEventListener('DOMContentLoaded', () => {
-            loadExample();
-        });
-        
-        // تهيئة التطبيق
+    // عند التحميل
+    window.onload = function() {
+        loadState();
+        renderForm();
         updateUI();
-    </script>
+    };
+
+    // --- Local Storage Functions ---
+    function saveState() {
+        localStorage.setItem('wathiq_v2_state', JSON.stringify(appState));
+        showToast();
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('wathiq_v2_state');
+        if (saved) {
+            appState = JSON.parse(saved);
+            document.getElementById('target-samples').value = appState.target;
+        } else {
+            // تهيئة مصفوفة فارغة بحجم العدد المستهدف
+            initEmptyData(40);
+        }
+    }
+
+    function initEmptyData(size) {
+        // التأكد من أن المصفوفة بحجم العدد المطلوب
+        if (appState.data.length < size) {
+            for (let i = appState.data.length; i < size; i++) {
+                appState.data.push({}); // كائن فارغ لكل عينة
+            }
+        }
+        appState.target = size;
+    }
+
+    function hardReset() {
+        if(confirm("هل أنت متأكد؟ سيتم حذف جميع البيانات والبدء من جديد!")) {
+            localStorage.removeItem('wathiq_v2_state');
+            location.reload();
+        }
+    }
+
+    // --- Core Logic ---
+    function updateTargetSamples() {
+        const newVal = parseInt(document.getElementById('target-samples').value);
+        if (newVal < 2) return;
+        appState.target = newVal;
+        initEmptyData(newVal);
+        updateUI(); // لتحديث العداد
+        saveState();
+    }
+
+    function renderForm() {
+        const container = document.getElementById('questions-area');
+        container.innerHTML = '';
+        let globalQIndex = 1; // لترقيم الـ ID
+
+        structure.forEach((section, sIdx) => {
+            const secDiv = document.createElement('div');
+            secDiv.innerHTML = `<div class="section-title" style="background:#eee; padding:10px; border-radius:5px; margin-top:20px; font-weight:bold;">${section.title}</div>`;
+            
+            section.qs.forEach((q, qIdx) => {
+                const qKey = `q${globalQIndex}`; // مفتاح السؤال الفريد
+                const qBlock = document.createElement('div');
+                qBlock.className = 'question-block';
+                qBlock.id = `block_${qKey}`;
+
+                let optionsHTML = '';
+                q.o.forEach((optText, optVal) => {
+                    // التحقق مما إذا كانت هناك قيمة محفوظة
+                    const savedVal = appState.data[appState.currentIdx] ? appState.data[appState.currentIdx][qKey] : undefined;
+                    const isChecked = (savedVal === optVal) ? 'checked' : '';
+
+                    optionsHTML += `
+                        <label>
+                            <input type="radio" name="${qKey}" value="${optVal}" ${isChecked} onchange="autoSaveField('${qKey}', ${optVal})">
+                            <span>${optText}</span>
+                        </label>
+                    `;
+                });
+
+                qBlock.innerHTML = `
+                    <span class="q-text">${q.t}</span>
+                    <div class="options-grid">${optionsHTML}</div>
+                `;
+                secDiv.appendChild(qBlock);
+                globalQIndex++;
+            });
+            container.appendChild(secDiv);
+        });
+    }
+
+    function autoSaveField(key, value) {
+        if (!appState.data[appState.currentIdx]) {
+            appState.data[appState.currentIdx] = {};
+        }
+        appState.data[appState.currentIdx][key] = value;
+        saveState();
+        
+        // إزالة التنبيه الأحمر إذا تم الحل
+        document.getElementById(`block_${key}`).classList.remove('unanswered');
+    }
+
+    function updateUI() {
+        document.getElementById('current-display').innerText = appState.currentIdx + 1;
+        document.getElementById('total-display').innerText = appState.target;
+        
+        // التحكم في الأزرار
+        document.getElementById('btn-prev').disabled = (appState.currentIdx === 0);
+        
+        const nextBtn = document.getElementById('btn-next');
+        if (appState.currentIdx === appState.target - 1) {
+            nextBtn.innerText = "إنهاء وتصدير";
+            nextBtn.style.backgroundColor = "#27ae60";
+        } else {
+            nextBtn.innerText = "التالي وحفظ";
+            nextBtn.style.backgroundColor = ""; // العودة للافتراضي CSS
+        }
+    }
+
+    function nextSample() {
+        if (validateCurrentSample()) {
+            if (appState.currentIdx < appState.target - 1) {
+                appState.currentIdx++;
+                renderForm(); // إعادة رسم الفورم للعينة الجديدة
+                updateUI();
+                window.scrollTo(0, 0);
+                saveState();
+            } else {
+                showExport();
+            }
+        }
+    }
+
+    function prevSample() {
+        if (appState.currentIdx > 0) {
+            appState.currentIdx--;
+            renderForm();
+            updateUI();
+            window.scrollTo(0, 0);
+            saveState();
+        }
+    }
+
+    function clearCurrentSample() {
+        if(confirm("هل تريد مسح إجابات هذه العينة فقط؟")) {
+            appState.data[appState.currentIdx] = {};
+            renderForm();
+            saveState();
+        }
+    }
+
+    function validateCurrentSample() {
+        const currentData = appState.data[appState.currentIdx] || {};
+        let totalQuestions = 32; // إجمالي الأسئلة
+        let firstMissing = null;
+
+        // إزالة أي تنبيهات سابقة
+        document.querySelectorAll('.question-block').forEach(b => b.classList.remove('unanswered'));
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const key = `q${i}`;
+            if (currentData[key] === undefined) {
+                const block = document.getElementById(`block_${key}`);
+                block.classList.add('unanswered');
+                if (!firstMissing) firstMissing = block;
+            }
+        }
+
+        if (firstMissing) {
+            // التمرير الذكي للسؤال الناقص
+            firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+        return true;
+    }
+
+    // --- Export Logic ---
+    function showExport() {
+        document.getElementById('survey-view').style.display = 'none';
+        document.getElementById('export-section').style.display = 'block';
+    }
+
+    function returnToSurvey() {
+        document.getElementById('survey-view').style.display = 'block';
+        document.getElementById('export-section').style.display = 'none';
+    }
+
+    function prepareDataForExport() {
+        return appState.data.slice(0, appState.target).map((item, index) => {
+            let row = { 'ID': index + 1 };
+            for(let i=1; i<=32; i++) {
+                row[`Q${i}`] = (item[`q${i}`] !== undefined) ? item[`q${i}`] : ''; 
+            }
+            return row;
+        });
+    }
+
+    function exportExcel() {
+        const data = prepareDataForExport();
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Data");
+        XLSX.writeFile(wb, "Wathiq_Results.xlsx");
+    }
+
+    function exportWord() {
+        const data = prepareDataForExport();
+        let html = `<h2 style='text-align:center'>بيانات مشروع واثق</h2>`;
+        html += `<table border="1" style="border-collapse: collapse; width: 100%; direction: rtl; text-align: center;">`;
+        
+        // Header
+        html += `<tr style="background:#ddd;"><th>العيّنة</th>`;
+        for(let i=1; i<=32; i++) html += `<th>س${i}</th>`;
+        html += `</tr>`;
+
+        // Body
+        data.forEach(row => {
+            html += `<tr><td>${row['ID']}</td>`;
+            for(let i=1; i<=32; i++) {
+                html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
+            }
+            html += `</tr>`;
+        });
+        html += `</table>`;
+
+        const blob = new Blob(['\ufeff', html], {
+            type: 'application/msword'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Wathiq_Results.doc'; // .doc يفتح بسهولة في وورد
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 1000);
+    }
+
+</script>
 </body>
 </html>
