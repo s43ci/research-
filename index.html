@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>واثِق - استبيان العلاج الإشعاعي</title>
+    <title>واثِق - البيانات الديموغرافية فقط</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
-            --secondary: #16a085; /* لون جديد طبي */
-            --accent: #27ae60;
-            --bg: #f4f7f6;
+            --secondary: #8e44ad; /* لون بنفسجي مميز للقسم الديموغرافي */
+            --bg: #f3f0f5;
             --white: #ffffff;
             --error: #c0392b;
         }
@@ -26,7 +25,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             background: var(--white);
             padding: 25px;
@@ -48,7 +47,7 @@
 
         .input-group-start {
             margin: 30px 0;
-            background: #ecf0f1;
+            background: #e8daef;
             padding: 20px;
             border-radius: 10px;
             width: 100%;
@@ -74,7 +73,7 @@
             border-radius: 50px;
             cursor: pointer;
             transition: transform 0.2s;
-            box-shadow: 0 4px 10px rgba(22, 160, 133, 0.3);
+            box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
         }
 
         .btn-start:hover { transform: scale(1.05); }
@@ -84,7 +83,7 @@
 
         /* شريط التقدم */
         .progress-header {
-            background: linear-gradient(135deg, var(--secondary), #2ecc71);
+            background: linear-gradient(135deg, var(--secondary), #9b59b6);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
@@ -97,7 +96,7 @@
 
         /* الأسئلة */
         .section-title {
-            background: #e8f6f3;
+            background: #f4ecf7;
             color: var(--secondary);
             padding: 12px;
             border-radius: 8px;
@@ -127,45 +126,36 @@
             display: block;
         }
 
-        /* تصميم الخيارات الأفقي السريع */
         .options-grid {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        /* تصميم خاص لأسئلة "أعرف/لا أعرف" لتكون بجانب بعض */
-        .options-grid.horizontal-mode {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        }
-
         .options-grid label {
             background: #f8f9fa;
             border: 1px solid #ddd;
             border-radius: 6px;
-            padding: 10px;
+            padding: 10px 15px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 5px;
-            user-select: none;
+            gap: 8px;
+            flex: 1 1 auto; /* يجعل الأزرار تتمدد بشكل متناسق */
         }
 
-        .options-grid label:hover { background: #e8f6f3; border-color: var(--secondary); }
+        .options-grid label:hover { background: #f4ecf7; border-color: var(--secondary); }
 
-        .options-grid input[type="radio"] { display: none; } /* إخفاء الدائرة التقليدية */
+        .options-grid input[type="radio"] { accent-color: var(--secondary); transform: scale(1.2); }
 
         /* عند الاختيار */
         .options-grid label:has(input:checked) {
-            background-color: var(--secondary);
-            color: white;
+            background-color: #e8daef;
+            color: var(--secondary);
             border-color: var(--secondary);
             font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         /* أزرار التحكم */
@@ -215,7 +205,7 @@
 <div class="container">
     <div id="welcome-screen">
         <h1 style="color:var(--secondary)">واثِق</h1>
-        <h3>استمارة تقييم معارف الممرضين (Radiotherapy)</h3>
+        <h3>استمارة البيانات الديموغرافية</h3>
         
         <div class="input-group-start">
             <label for="start-count">أدخل عدد العينات الكلي:</label>
@@ -223,11 +213,6 @@
         </div>
 
         <button class="btn-start" onclick="startSurvey()">تأكيد وبدء الاستبيان</button>
-        
-        <p style="margin-top:20px; font-size:0.9em; color:#7f8c8d;">
-            * يتم حفظ البيانات تلقائياً<br>
-            * يمكنك التصدير لـ Excel و Word في النهاية
-        </p>
     </div>
 
     <div id="survey-view">
@@ -249,7 +234,7 @@
 
     <div id="export-section">
         <h2 style="color:var(--secondary)">تم إكمال الاستبيان!</h2>
-        <p>البيانات جاهزة للحفظ</p>
+        <p>البيانات الديموغرافية جاهزة للحفظ</p>
         <button class="btn btn-excel" onclick="exportExcel()">📥 تحميل Excel (.xlsx)</button>
         <button class="btn btn-word" onclick="exportWord()">📥 تحميل Word (.docx)</button>
         <br><br>
@@ -260,13 +245,10 @@
 <div id="toast" class="toast">تم الحفظ ✅</div>
 
 <script>
-    // --- هيكلية البيانات بناءً على الـ PDF ---
-    // تم إضافة خيار "لا ينطبق" لأسئلة الدورة التدريبية لتجنب الخطأ الإجباري
-    
+    // --- هيكلية البيانات (المعلومات الديموغرافية فقط) ---
     const structure = [
         {
-            title: "أولاً: المعلومات الديموغرافية",
-            type: "demo",
+            title: "المعلومات الديموغرافية",
             qs: [
                 {t:"1. الجنس:", o:["ذكر", "أنثى"]},
                 {t:"2. العمر:", o:["20-29 سنة", "30-39 سنة", "40-49 سنة", "50 فأكثر"]},
@@ -274,34 +256,8 @@
                 {t:"4. الحالة الزوجية:", o:["أعزب / عزباء", "متزوج / متزوجة", "مطلق / مطلقة", "أرمل / أرملة"]},
                 {t:"5. سنوات الخدمة:", o:["أقل من 5 سنوات", "5-9 سنوات", "10-14 سنة", "15-19 سنة", "20-24 سنة", "25 سنة فأكثر"]},
                 {t:"6. هل اشتركت في دورات علاج الأورام؟", o:["نعم", "لا"]},
-                {t:"- مدة الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["3-5 أيام", "6-10 أيام", "11 يوم فأكثر", "لا ينطبق"]},
-                {t:"- مكان الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["داخل المحافظة", "خارج المحافظة", "خارج القطر", "لا ينطبق"]}
-            ]
-        },
-        {
-            title: "ثانياً: معارف الممرضين (أعرف / لا أعرف / غير متأكد)",
-            type: "knowledge", // لتفعيل التصميم الأفقي
-            qs: [
-                {t:"1. ما هي أهم الآثار الجانبية الشائعة للعلاج الإشعاعي؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"2. ما هي المبادئ الأساسية للوقاية من الإشعاع (وقت، مسافة، حماية)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"3. ما هي العلامات المبكرة لالتهاب الجلد الإشعاعي؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"4. تعليم المريض العناية بالجلد أثناء فترة العلاج؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"5. احتياطات التعامل مع سوائل جسم المريض (إشعاع داخلي)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"6. إرشادات السلامة لزيارة الأقارب (إشعاع داخلي)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"7. دور الممرض في الدعم النفسي للمريض؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"8. الفحوصات المختبرية الواجب متابعتها؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"9. الهدف الرئيسي للعلاج الإشعاعي؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"10. نصيحة للمريض لتجنب تهيج الجلد؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"11. نوع العلاج (مادة مشعة داخل الورم)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"12. احتياطات السلامة عند التعامل مع مريض (Brachytherapy)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"13. عرض جانبي شائع في الرأس والرقبة؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"14. كمية الماء التي ينصح بشربها يومياً؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"15. دور الممرض في رعاية مريض العلاج الإشعاعي؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"16. كيفية مراقبة مضاعفات العلاج بشكل فعال؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"17. مضاعفة محتملة في منطقة الصدر؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"18. الإجراء المناسب لتخفيف التعب (Fatigue)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"19. تقليل خطر التهابات الفم (Oral Mucositis)؟", o:["أعرف", "لا أعرف", "غير متأكد"]},
-                {t:"20. مضاعفة محتملة في منطقة الرأس والرقبة؟", o:["أعرف", "لا أعرف", "غير متأكد"]}
+                {t:"7. مدة الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["3-5 أيام", "6-10 أيام", "11 يوم فأكثر", "لا ينطبق"]},
+                {t:"8. مكان الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["داخل المحافظة", "خارج المحافظة", "خارج القطر", "لا ينطبق"]}
             ]
         }
     ];
@@ -314,12 +270,10 @@
 
     // --- Start Logic ---
     window.onload = function() {
-        const saved = localStorage.getItem('wathiq_radiotherapy_state');
+        const saved = localStorage.getItem('wathiq_demo_only_v1');
         if (saved) {
             appState = JSON.parse(saved);
-            showSurveyInterface(); // إذا كان هناك حفظ سابق، انتقل مباشرة
-        } else {
-            // البقاء في شاشة الترحيب
+            showSurveyInterface();
         }
     };
 
@@ -354,9 +308,6 @@
             const secDiv = document.createElement('div');
             secDiv.innerHTML = `<div class="section-title">${section.title}</div>`;
             
-            // تحديد كلاس الشبكة (أفقي للمعرفة، عادي للديموغرافية)
-            const gridClass = section.type === 'knowledge' ? 'options-grid horizontal-mode' : 'options-grid';
-
             section.qs.forEach((q) => {
                 const qKey = `q${globalQIndex}`;
                 const qBlock = document.createElement('div');
@@ -378,7 +329,7 @@
 
                 qBlock.innerHTML = `
                     <span class="q-text">${q.t}</span>
-                    <div class="${gridClass}">${optionsHTML}</div>
+                    <div class="options-grid">${optionsHTML}</div>
                 `;
                 secDiv.appendChild(qBlock);
                 globalQIndex++;
@@ -421,7 +372,7 @@
 
     function validateCurrentSample() {
         const currentData = appState.data[appState.currentIdx] || {};
-        let totalQuestions = 28; // 8 Demo + 20 Knowledge
+        let totalQuestions = 8; // عدد الأسئلة الديموغرافية فقط
         let firstMissing = null;
 
         document.querySelectorAll('.question-block').forEach(b => b.classList.remove('unanswered'));
@@ -466,12 +417,12 @@
     }
 
     function saveState() {
-        localStorage.setItem('wathiq_radiotherapy_state', JSON.stringify(appState));
+        localStorage.setItem('wathiq_demo_only_v1', JSON.stringify(appState));
     }
 
     function hardReset() {
         if(confirm("تحذير: سيتم حذف جميع البيانات والعودة للبداية!")) {
-            localStorage.removeItem('wathiq_radiotherapy_state');
+            localStorage.removeItem('wathiq_demo_only_v1');
             location.reload();
         }
     }
@@ -496,7 +447,8 @@
     function prepareData() {
         return appState.data.slice(0, appState.target).map((item, idx) => {
             let row = { 'ID': idx + 1 };
-            for(let i=1; i<=28; i++) {
+            // فقط 8 أسئلة
+            for(let i=1; i<=8; i++) {
                 row[`Q${i}`] = (item[`q${i}`] !== undefined) ? item[`q${i}`] : ''; 
             }
             return row;
@@ -506,20 +458,22 @@
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(prepareData());
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Results");
-        XLSX.writeFile(wb, "Radiotherapy_Data.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Demographics");
+        XLSX.writeFile(wb, "Demographics_Data.xlsx");
     }
 
     function exportWord() {
         const data = prepareData();
         let html = `<table border="1" style="border-collapse: collapse; text-align: center; width:100%; direction:rtl;">`;
         html += `<tr style="background:#eee;"><th>ت</th>`;
-        for(let i=1; i<=28; i++) html += `<th>س${i}</th>`;
+        // عناوين الأعمدة بناء على الطلب
+        const headers = ["الجنس", "العمر", "التعليم", "ح.زوجية", "الخدمة", "دورات؟", "المدة", "المكان"];
+        headers.forEach(h => html += `<th>${h}</th>`);
         html += `</tr>`;
         
         data.forEach(row => {
             html += `<tr><td>${row['ID']}</td>`;
-            for(let i=1; i<=28; i++) html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
+            for(let i=1; i<=8; i++) html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
             html += `</tr>`;
         });
         html += `</table>`;
@@ -527,7 +481,7 @@
         const blob = new Blob(['\ufeff', `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>${html}</body></html>`], {type: 'application/msword'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'Radiotherapy_Data.doc';
+        link.download = 'Demographics_Data.doc';
         link.click();
     }
 </script>
