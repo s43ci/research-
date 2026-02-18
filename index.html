@@ -3,35 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>واثِق - البيانات الديموغرافية فقط</title>
+    <title>واثِق - استبيان السلامة المهنية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #8e44ad; /* لون بنفسجي مميز للقسم الديموغرافي */
-            --bg: #f3f0f5;
+            --primary: #00838f; /* لون تركواز داكن وقور */
+            --secondary: #00acc1; /* لون تركواز فاتح */
+            --bg: #e0f7fa;
             --white: #ffffff;
-            --error: #c0392b;
+            --text: #263238;
+            --error: #d32f2f;
+            --success: #2e7d32;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cairo', sans-serif;
             background-color: var(--bg);
             margin: 0;
-            padding: 20px;
-            color: var(--primary);
+            padding: 0;
+            color: var(--text);
             line-height: 1.6;
-            padding-bottom: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            padding: 20px;
+            padding-bottom: 60px; /* مساحة للفوتر */
         }
 
         .container {
-            max-width: 800px;
+            max-width: 950px;
             margin: 0 auto;
             background: var(--white);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            min-height: 400px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 131, 143, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* شريط علوي جمالي */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
 
         /* شاشة البداية */
@@ -40,239 +63,375 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            padding: 40px 0;
+            min-height: 400px;
             text-align: center;
+        }
+
+        .logo-text {
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
         }
 
         .input-group-start {
             margin: 30px 0;
-            background: #e8daef;
-            padding: 20px;
-            border-radius: 10px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #b2ebf2;
             width: 100%;
-            max-width: 300px;
+            max-width: 350px;
+        }
+
+        .input-group-start label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary);
         }
 
         .input-group-start input {
             width: 80%;
-            padding: 10px;
-            font-size: 1.2em;
+            padding: 12px;
+            font-size: 1.3em;
             text-align: center;
-            border: 2px solid var(--secondary);
-            border-radius: 5px;
-            margin-top: 10px;
+            border: 2px solid #b2ebf2;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        .input-group-start input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
         }
 
         .btn-start {
-            background-color: var(--secondary);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
             color: white;
-            padding: 15px 50px;
+            padding: 15px 60px;
             font-size: 1.2em;
+            font-weight: 700;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 131, 143, 0.3);
+            font-family: 'Cairo', sans-serif;
         }
 
-        .btn-start:hover { transform: scale(1.05); }
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 131, 143, 0.4);
+        }
 
         /* واجهة الاستبيان */
         #survey-view { display: none; }
 
         /* شريط التقدم */
         .progress-header {
-            background: linear-gradient(135deg, var(--secondary), #9b59b6);
-            color: white;
+            background: #f0fbfc;
             padding: 15px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            font-weight: bold;
+            margin-bottom: 30px;
+            border: 1px solid #b2ebf2;
         }
 
-        /* الأسئلة */
-        .section-title {
-            background: #f4ecf7;
-            color: var(--secondary);
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 25px;
-            margin-bottom: 15px;
+        .counter-badge {
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
             font-weight: bold;
             font-size: 1.1em;
-            border-right: 5px solid var(--secondary);
+        }
+
+        /* العناوين والأقسام */
+        .section-title {
+            background: linear-gradient(90deg, var(--primary), transparent);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.2em;
         }
 
         .question-block {
             margin-bottom: 15px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             background: #fff;
+            transition: all 0.2s;
+        }
+
+        .question-block:hover {
+            border-color: var(--secondary);
+            background: #fbfdfe;
         }
 
         .question-block.unanswered {
             border: 2px solid var(--error);
-            background-color: #fff5f5;
+            background-color: #ffebee;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .q-text {
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: block;
+            color: var(--text);
+            font-size: 1.05em;
         }
 
+        /* خيارات الراديو */
         .options-grid {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
         .options-grid label {
-            background: #f8f9fa;
+            background: #f5f5f5;
             border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 10px 15px;
+            border-radius: 8px;
+            padding: 10px 20px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex: 1 1 auto; /* يجعل الأزرار تتمدد بشكل متناسق */
+            gap: 10px;
+            min-width: 100px;
+            justify-content: center;
+            user-select: none;
         }
 
-        .options-grid label:hover { background: #f4ecf7; border-color: var(--secondary); }
-
-        .options-grid input[type="radio"] { accent-color: var(--secondary); transform: scale(1.2); }
-
-        /* عند الاختيار */
-        .options-grid label:has(input:checked) {
-            background-color: #e8daef;
-            color: var(--secondary);
+        .options-grid label:hover {
+            background: #e0f7fa;
             border-color: var(--secondary);
-            font-weight: bold;
         }
 
-        /* أزرار التحكم */
+        .options-grid input[type="radio"] {
+            accent-color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .options-grid label:has(input:checked) {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 131, 143, 0.2);
+        }
+
+        /* الأزرار */
         .action-bar {
             display: flex;
-            gap: 10px;
-            margin-top: 30px;
+            gap: 15px;
+            margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 2px solid #f0f0f0;
         }
 
         .btn {
-            padding: 12px;
+            padding: 15px;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            font-family: 'Cairo', sans-serif;
             cursor: pointer;
             flex: 1;
-            font-size: 16px;
+            transition: 0.2s;
         }
 
         .btn-next { background-color: var(--primary); color: white; }
-        .btn-prev { background-color: #95a5a6; color: white; }
-        .btn-clear { background-color: #e74c3c; color: white; flex: 0 0 100px; }
+        .btn-next:hover { background-color: #006064; }
+
+        .btn-prev { background-color: #78909c; color: white; }
+        .btn-prev:hover { background-color: #546e7a; }
+
+        .btn-clear { background-color: #ff5252; color: white; flex: 0 0 120px; }
+        .btn-clear:hover { background-color: #d32f2f; }
 
         /* التصدير */
-        #export-section { display: none; text-align: center; padding: 40px; }
-        .btn-excel { background-color: #217346; color: white; width: 100%; margin-bottom: 10px; padding: 15px;}
-        .btn-word { background-color: #2b579a; color: white; width: 100%; padding: 15px;}
+        #export-section { display: none; text-align: center; padding: 50px 20px; }
+        .success-icon { font-size: 60px; color: var(--success); margin-bottom: 20px; display: block; }
+        
+        .btn-excel { background-color: #1b5e20; color: white; width: 100%; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-word { background-color: #0d47a1; color: white; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        /* الفوتر */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--white);
+            border-top: 1px solid #eee;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-top: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(38, 50, 56, 0.9);
             color: white;
-            padding: 10px 25px;
+            padding: 12px 30px;
             border-radius: 50px;
             display: none;
             z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="welcome-screen">
-        <h1 style="color:var(--secondary)">واثِق</h1>
-        <h3>استمارة البيانات الديموغرافية</h3>
-        
-        <div class="input-group-start">
-            <label for="start-count">أدخل عدد العينات الكلي:</label>
-            <input type="number" id="start-count" value="40" min="1">
+<div class="main-wrapper">
+    <div class="container">
+        <div id="welcome-screen">
+            <div class="logo-text">واثِق</div>
+            <h2 style="color:var(--text); margin-top:0;">إجراءات السلامة المهنية في الرعاية الصحية</h2>
+            
+            <div class="input-group-start">
+                <label for="start-count">عدد العينات المستهدف:</label>
+                <input type="number" id="start-count" value="50" min="1">
+            </div>
+
+            <button class="btn-start" onclick="startSurvey()">ابدأ المشروع</button>
+            <p style="color:#78909c; font-size:0.9em; margin-top:20px;">يتم حفظ تقدمك تلقائياً على هذا الجهاز</p>
         </div>
 
-        <button class="btn-start" onclick="startSurvey()">تأكيد وبدء الاستبيان</button>
-    </div>
+        <div id="survey-view">
+            <div class="progress-header">
+                <div>
+                    <span style="color:#78909c">العينة الحالية:</span>
+                    <span id="current-display" class="counter-badge">1</span>
+                </div>
+                <div>
+                    <span style="color:#78909c">من أصل:</span>
+                    <span id="total-display" style="font-weight:bold; font-size:1.1em; margin-right:5px;">50</span>
+                </div>
+                <button onclick="hardReset()" style="margin-right:auto; background:none; border:none; color:#b0bec5; cursor:pointer; font-family:'Cairo'"> إعادة ضبط ↻</button>
+            </div>
 
-    <div id="survey-view">
-        <div class="progress-header">
-            <button onclick="hardReset()" style="background:transparent; border:none; color:white; font-size:0.8em; cursor:pointer;">⚠️ تصفير</button>
-            <span>عينة: <span id="current-display" style="font-size:1.4em;">1</span> من <span id="total-display">40</span></span>
+            <form id="mainForm">
+                <div id="questions-area"></div>
+            </form>
+
+            <div class="action-bar">
+                <button class="btn btn-prev" onclick="prevSample()" id="btn-prev" disabled>السابق</button>
+                <button class="btn btn-clear" onclick="clearCurrentSample()">مسح العينة</button>
+                <button class="btn btn-next" onclick="nextSample()" id="btn-next">التالي وحفظ</button>
+            </div>
         </div>
 
-        <form id="mainForm">
-            <div id="questions-area"></div>
-        </form>
-
-        <div class="action-bar">
-            <button class="btn btn-prev" onclick="prevSample()" id="btn-prev" disabled>السابق</button>
-            <button class="btn btn-clear" onclick="clearCurrentSample()">مسح</button>
-            <button class="btn btn-next" onclick="nextSample()" id="btn-next">التالي</button>
+        <div id="export-section">
+            <span class="success-icon">✔</span>
+            <h2 style="color:var(--text)">تم إكمال جميع العينات!</h2>
+            <p style="color:#607d8b; margin-bottom:30px;">بياناتك جاهزة للتصدير بالصيغ المطلوبة</p>
+            
+            <button class="btn btn-excel" onclick="exportExcel()">تحميل ملف Excel (.xlsx)</button>
+            <button class="btn btn-word" onclick="exportWord()">تحميل ملف Word (.docx)</button>
+            
+            <div style="margin-top:30px;">
+                <button class="btn btn-prev" onclick="returnToSurvey()" style="width:auto; padding:10px 30px;">عودة للمراجعة</button>
+            </div>
         </div>
-    </div>
-
-    <div id="export-section">
-        <h2 style="color:var(--secondary)">تم إكمال الاستبيان!</h2>
-        <p>البيانات الديموغرافية جاهزة للحفظ</p>
-        <button class="btn btn-excel" onclick="exportExcel()">📥 تحميل Excel (.xlsx)</button>
-        <button class="btn btn-word" onclick="exportWord()">📥 تحميل Word (.docx)</button>
-        <br><br>
-        <button class="btn btn-prev" onclick="returnToSurvey()" style="background:#7f8c8d; width: auto;">عودة للمراجعة</button>
     </div>
 </div>
 
-<div id="toast" class="toast">تم الحفظ ✅</div>
+<div class="footer">
+    تم التطوير بواسطة واثق محمد
+</div>
+
+<div id="toast" class="toast">تم الحفظ بنجاح</div>
 
 <script>
-    // --- هيكلية البيانات (المعلومات الديموغرافية فقط) ---
+    // --- هيكلية الاستبيان (طبقا لملف PDF) ---
+    // الترميز: نعم = 0, لا = 1
+    
     const structure = [
         {
-            title: "المعلومات الديموغرافية",
+            title: "أولاً: المعلومات الديموغرافية",
             qs: [
-                {t:"1. الجنس:", o:["ذكر", "أنثى"]},
-                {t:"2. العمر:", o:["20-29 سنة", "30-39 سنة", "40-49 سنة", "50 فأكثر"]},
-                {t:"3. المستوى العلمي:", o:["إعدادية", "معهد", "كلية", "دراسات عليا"]},
-                {t:"4. الحالة الزوجية:", o:["أعزب / عزباء", "متزوج / متزوجة", "مطلق / مطلقة", "أرمل / أرملة"]},
-                {t:"5. سنوات الخدمة:", o:["أقل من 5 سنوات", "5-9 سنوات", "10-14 سنة", "15-19 سنة", "20-24 سنة", "25 سنة فأكثر"]},
-                {t:"6. هل اشتركت في دورات علاج الأورام؟", o:["نعم", "لا"]},
-                {t:"7. مدة الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["3-5 أيام", "6-10 أيام", "11 يوم فأكثر", "لا ينطبق"]},
-                {t:"8. مكان الدورة (اختر لا ينطبق إذا كان الجواب السابق لا):", o:["داخل المحافظة", "خارج المحافظة", "خارج القطر", "لا ينطبق"]}
+                {t:"1. الجنس:", o:[{t:"ذكر",v:0}, {t:"أنثى",v:1}]}, // 0=ذكر, 1=انثى (أو حسب الترميز المفضل لك)
+                {t:"2. العمر:", o:[{t:"أقل من 25 سنة",v:0}, {t:"25-34 سنة",v:1}, {t:"35-44 سنة",v:2}, {t:"45 سنة فأكثر",v:3}]},
+                {t:"3. المستوى التعليمي:", o:[{t:"إعدادية",v:0}, {t:"دبلوم",v:1}, {t:"بكالوريوس",v:2}, {t:"دراسات عليا",v:3}]},
+                {t:"4. سنوات الخبرة:", o:[{t:"أقل من سنة",v:0}, {t:"1-5 سنوات",v:1}, {t:"6-10 سنوات",v:2}, {t:"11 سنة فأكثر",v:3}]},
+                {t:"5. هل شاركت سابقاً في دورات عن السلامة المهنية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
+            ]
+        },
+        {
+            title: "ثانياً: معارف الممرضين حول إجراءات السلامة المهنية",
+            qs: [
+                {t:"1. استخدام الكمامة ضروري عند التعامل مع الأمراض التنفسية المعدية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"2. غسل اليدين قبل وبعد التعامل مع المريض يقلل من انتقال العدوى", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"3. ارتداء القفازات ضروري عند التعامل مع سوائل جسم المريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"4. التخلص الآمن من الأدوات الحادة يتم بوضعها في حاويات مقاومة للثقب", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"5. هل إعادة تغطية الإبرة بعد الاستخدام يزيد من خطر الإصابة؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"6. يجب الإبلاغ فوراً عن أي إصابة بوخز الإبر داخل المؤسسة الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"7. التطعيم ضد التهاب الكبد B من إجراءات السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"8. التهوية الجيدة تقلل من مخاطر انتقال العدوى في المراكز الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"9. هل يوجد نظام خاص للتخلص من النفايات الطبية الخطرة في مكان عملك؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"10. هل التعرض المستمر للمواد الكيميائية قد يسبب مشاكل صحية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"11. هل الإجهاد البدني والنفسي يعتبر من مخاطر العمل التمريضي؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"12. هل لقاحات العاملين الصحيين جزء من إجراءات السلامة المهنية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
+            ]
+        },
+        {
+            title: "ثالثاً: اتجاهات الممرضين نحو إجراءات السلامة المهنية",
+            qs: [
+                {t:"1. أرى أن الالتزام بتطبيق اجراءات السلامة يزيد من جودة الرعاية الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"2. أعتقد أن السلامة المهنية جزء أساسي من أخلاقيات مهنة التمريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"3. أعتقد أن الإهمال في إجراءات السلامة يعرض المرضى للخطر", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"4. تتوفر في مركز عملي مستلزمات السلامة المهنية بشكل كاف", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"5. أحتاج إلى دورات تدريبية إضافية حول السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"6. إدارة المركز الصحي تشجع على الالتزام بإجراءات السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"7. أعتقد أن إجراءات السلامة تقلل من الأخطاء المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"8. أرى أن التدريب المستمر يحسن الالتزام بالسلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"9. أرى أن إجراءات السلامة المهنية تحمي الممرض والمريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
+                {t:"10. أشعر بالمسؤولية تجاه الإبلاغ عن الحوادث المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
             ]
         }
     ];
 
     let appState = {
-        target: 40,
+        target: 50,
         currentIdx: 0,
         data: []
     };
 
-    // --- Start Logic ---
+    // --- المنطق البرمجي ---
+
     window.onload = function() {
-        const saved = localStorage.getItem('wathiq_demo_only_v1');
+        const saved = localStorage.getItem('wathiq_safety_v2');
         if (saved) {
             appState = JSON.parse(saved);
+            // التأكد من أن العدد الافتراضي محدث
+            document.getElementById('start-count').value = appState.target;
             showSurveyInterface();
         }
     };
@@ -282,12 +441,14 @@
         const count = parseInt(countInput);
         if (count && count > 0) {
             appState.target = count;
-            // تهيئة المصفوفة
-            for(let i=0; i<count; i++) appState.data.push({});
+            // ملء المصفوفة إذا كانت فارغة أو توسيعها
+            if (appState.data.length < count) {
+                for(let i=appState.data.length; i<count; i++) appState.data.push({});
+            }
             saveState();
             showSurveyInterface();
         } else {
-            alert("يرجى إدخال عدد صحيح أكبر من 0");
+            alert("يرجى إدخال عدد صحيح.");
         }
     }
 
@@ -296,9 +457,9 @@
         document.getElementById('survey-view').style.display = 'block';
         updateUI();
         renderForm();
+        window.scrollTo(0,0);
     }
 
-    // --- Render & Logic ---
     function renderForm() {
         const container = document.getElementById('questions-area');
         container.innerHTML = '';
@@ -315,14 +476,16 @@
                 qBlock.id = `block_${qKey}`;
 
                 let optionsHTML = '';
-                q.o.forEach((optText, optIdx) => {
+                q.o.forEach((opt) => {
+                    // استرجاع القيمة المحفوظة
                     const savedVal = appState.data[appState.currentIdx] ? appState.data[appState.currentIdx][qKey] : undefined;
-                    const isChecked = (savedVal === optIdx) ? 'checked' : '';
+                    // مقارنة القيم للتحديد
+                    const isChecked = (savedVal == opt.v) ? 'checked' : '';
 
                     optionsHTML += `
                         <label>
-                            <input type="radio" name="${qKey}" value="${optIdx}" ${isChecked} onchange="autoSaveField('${qKey}', ${optIdx})">
-                            ${optText}
+                            <input type="radio" name="${qKey}" value="${opt.v}" ${isChecked} onchange="autoSaveField('${qKey}', ${opt.v})">
+                            ${opt.t}
                         </label>
                     `;
                 });
@@ -336,7 +499,6 @@
             });
             container.appendChild(secDiv);
         });
-        window.scrollTo(0,0);
     }
 
     function autoSaveField(key, value) {
@@ -354,6 +516,7 @@
                 renderForm();
                 updateUI();
                 showToast();
+                window.scrollTo(0, 0);
             } else {
                 saveState();
                 showExport();
@@ -367,12 +530,13 @@
             saveState();
             renderForm();
             updateUI();
+            window.scrollTo(0, 0);
         }
     }
 
     function validateCurrentSample() {
         const currentData = appState.data[appState.currentIdx] || {};
-        let totalQuestions = 8; // عدد الأسئلة الديموغرافية فقط
+        let totalQuestions = 27; // 5 Demo + 12 Knowledge + 10 Attitudes
         let firstMissing = null;
 
         document.querySelectorAll('.question-block').forEach(b => b.classList.remove('unanswered'));
@@ -401,15 +565,15 @@
         const nextBtn = document.getElementById('btn-next');
         if (appState.currentIdx === appState.target - 1) {
             nextBtn.innerText = "إنهاء وتصدير";
-            nextBtn.style.backgroundColor = "#27ae60";
+            nextBtn.style.backgroundColor = "#2e7d32"; // أخضر
         } else {
-            nextBtn.innerText = "التالي";
-            nextBtn.style.backgroundColor = ""; 
+            nextBtn.innerText = "التالي وحفظ";
+            nextBtn.style.backgroundColor = ""; // استعادة اللون الأصلي
         }
     }
 
     function clearCurrentSample() {
-        if(confirm("مسح إجابات هذه العينة؟")) {
+        if(confirm("هل أنت متأكد من مسح إجابات هذه العينة؟")) {
             appState.data[appState.currentIdx] = {};
             renderForm();
             saveState();
@@ -417,12 +581,12 @@
     }
 
     function saveState() {
-        localStorage.setItem('wathiq_demo_only_v1', JSON.stringify(appState));
+        localStorage.setItem('wathiq_safety_v2', JSON.stringify(appState));
     }
 
     function hardReset() {
-        if(confirm("تحذير: سيتم حذف جميع البيانات والعودة للبداية!")) {
-            localStorage.removeItem('wathiq_demo_only_v1');
+        if(confirm("تحذير: سيتم حذف جميع البيانات والبدء من جديد. هل أنت متأكد؟")) {
+            localStorage.removeItem('wathiq_safety_v2');
             location.reload();
         }
     }
@@ -433,7 +597,8 @@
         setTimeout(() => t.style.display = 'none', 1000);
     }
 
-    // --- Export ---
+    // --- التصدير ---
+
     function showExport() {
         document.getElementById('survey-view').style.display = 'none';
         document.getElementById('export-section').style.display = 'block';
@@ -444,11 +609,17 @@
         document.getElementById('export-section').style.display = 'none';
     }
 
-    function prepareData() {
+    function prepareData(useText = true) {
+        // useText: إذا true يصدر النص (نعم/لا)، إذا false يصدر الأرقام (0/1)
+        // طلبك الأول كان ترميز رقمي، سأجعل الافتراضي رقمي للأعمدة
+        
         return appState.data.slice(0, appState.target).map((item, idx) => {
             let row = { 'ID': idx + 1 };
-            // فقط 8 أسئلة
-            for(let i=1; i<=8; i++) {
+            
+            // نحتاج لربط القيم الرقمية بالنصوص للتصدير النصي إذا احتجنا
+            // لكن هنا سنصدر القيم كما خُزنت (0 و 1)
+            
+            for(let i=1; i<=27; i++) {
                 row[`Q${i}`] = (item[`q${i}`] !== undefined) ? item[`q${i}`] : ''; 
             }
             return row;
@@ -458,30 +629,36 @@
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(prepareData());
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Demographics");
-        XLSX.writeFile(wb, "Demographics_Data.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Safety_Data");
+        XLSX.writeFile(wb, "Safety_Survey_Data.xlsx");
     }
 
     function exportWord() {
         const data = prepareData();
-        let html = `<table border="1" style="border-collapse: collapse; text-align: center; width:100%; direction:rtl;">`;
+        let html = `<h2 style='text-align:center; font-family:Arial'>بيانات استبيان السلامة المهنية</h2>`;
+        html += `<table border="1" style="border-collapse: collapse; text-align: center; width:100%; direction:rtl; font-family:Arial;">`;
+        
+        // الهيدر
         html += `<tr style="background:#eee;"><th>ت</th>`;
-        // عناوين الأعمدة بناء على الطلب
-        const headers = ["الجنس", "العمر", "التعليم", "ح.زوجية", "الخدمة", "دورات؟", "المدة", "المكان"];
-        headers.forEach(h => html += `<th>${h}</th>`);
+        for(let i=1; i<=27; i++) html += `<th>س${i}</th>`;
         html += `</tr>`;
         
+        // البيانات
         data.forEach(row => {
             html += `<tr><td>${row['ID']}</td>`;
-            for(let i=1; i<=8; i++) html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
+            for(let i=1; i<=27; i++) {
+                // القيم ستظهر 0 أو 1
+                html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
+            }
             html += `</tr>`;
         });
         html += `</table>`;
+        html += `<br><p style='text-align:center'>تم التطوير بواسطة واثق محمد</p>`;
         
         const blob = new Blob(['\ufeff', `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>${html}</body></html>`], {type: 'application/msword'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'Demographics_Data.doc';
+        link.download = 'Safety_Survey_Data.doc';
         link.click();
     }
 </script>
