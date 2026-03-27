@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>واثِق - استبيان السلامة المهنية</title>
+    <title>واثِق - استبيان طلاب الأشعة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #00838f; /* لون تركواز داكن وقور */
-            --secondary: #00acc1; /* لون تركواز فاتح */
-            --bg: #e0f7fa;
+            --primary: #1565c0; /* أزرق طبي داكن */
+            --secondary: #1e88e5; /* أزرق فاتح */
+            --bg: #f0f4f8;
             --white: #ffffff;
             --text: #263238;
             --error: #d32f2f;
@@ -32,7 +32,7 @@
         .main-wrapper {
             flex: 1;
             padding: 20px;
-            padding-bottom: 60px; /* مساحة للفوتر */
+            padding-bottom: 60px;
         }
 
         .container {
@@ -40,13 +40,12 @@
             margin: 0 auto;
             background: var(--white);
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 131, 143, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(21, 101, 192, 0.1);
             position: relative;
             overflow: hidden;
         }
 
-        /* شريط علوي جمالي */
         .container::before {
             content: '';
             position: absolute;
@@ -72,7 +71,6 @@
             font-weight: 700;
             color: var(--primary);
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
         }
 
         .input-group-start {
@@ -81,7 +79,7 @@
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #b2ebf2;
+            border: 1px solid #bbdefb;
             width: 100%;
             max-width: 350px;
         }
@@ -98,16 +96,15 @@
             padding: 12px;
             font-size: 1.3em;
             text-align: center;
-            border: 2px solid #b2ebf2;
+            border: 2px solid #bbdefb;
             border-radius: 10px;
             font-family: 'Cairo', sans-serif;
-            transition: 0.3s;
             outline: none;
         }
 
         .input-group-start input:focus {
             border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.2);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
         }
 
         .btn-start {
@@ -120,28 +117,23 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 131, 143, 0.3);
             font-family: 'Cairo', sans-serif;
         }
 
-        .btn-start:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 131, 143, 0.4);
-        }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(21, 101, 192, 0.4); }
 
         /* واجهة الاستبيان */
         #survey-view { display: none; }
 
-        /* شريط التقدم */
         .progress-header {
-            background: #f0fbfc;
+            background: #e3f2fd;
             padding: 15px 20px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            border: 1px solid #b2ebf2;
+            border: 1px solid #bbdefb;
         }
 
         .counter-badge {
@@ -153,7 +145,6 @@
             font-size: 1.1em;
         }
 
-        /* العناوين والأقسام */
         .section-title {
             background: linear-gradient(90deg, var(--primary), transparent);
             color: white;
@@ -174,10 +165,7 @@
             transition: all 0.2s;
         }
 
-        .question-block:hover {
-            border-color: var(--secondary);
-            background: #fbfdfe;
-        }
+        .question-block:hover { border-color: var(--secondary); background: #fafbfc; }
 
         .question-block.unanswered {
             border: 2px solid var(--error);
@@ -199,12 +187,8 @@
             font-size: 1.05em;
         }
 
-        /* خيارات الراديو */
-        .options-grid {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+        .options-grid { display: flex; gap: 15px; flex-wrap: wrap; }
+        .options-grid.horizontal-mode { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
 
         .options-grid label {
             background: #f5f5f5;
@@ -217,30 +201,34 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            min-width: 100px;
             justify-content: center;
             user-select: none;
+            flex: 1 1 auto;
         }
 
-        .options-grid label:hover {
-            background: #e0f7fa;
-            border-color: var(--secondary);
-        }
-
-        .options-grid input[type="radio"] {
-            accent-color: var(--primary);
-            transform: scale(1.2);
-        }
-
+        .options-grid label:hover { background: #e3f2fd; border-color: var(--secondary); }
+        .options-grid input[type="radio"] { accent-color: var(--primary); transform: scale(1.2); }
         .options-grid label:has(input:checked) {
             background-color: var(--primary);
             color: white;
             border-color: var(--primary);
             font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0, 131, 143, 0.2);
         }
 
-        /* الأزرار */
+        /* حقل الإدخال النصي (للعمر) */
+        .number-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: 'Cairo', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .number-input:focus { border-color: var(--secondary); }
+
         .action-bar {
             display: flex;
             gap: 15px;
@@ -262,22 +250,14 @@
         }
 
         .btn-next { background-color: var(--primary); color: white; }
-        .btn-next:hover { background-color: #006064; }
-
         .btn-prev { background-color: #78909c; color: white; }
-        .btn-prev:hover { background-color: #546e7a; }
-
         .btn-clear { background-color: #ff5252; color: white; flex: 0 0 120px; }
-        .btn-clear:hover { background-color: #d32f2f; }
 
-        /* التصدير */
         #export-section { display: none; text-align: center; padding: 50px 20px; }
         .success-icon { font-size: 60px; color: var(--success); margin-bottom: 20px; display: block; }
-        
-        .btn-excel { background-color: #1b5e20; color: white; width: 100%; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-word { background-color: #0d47a1; color: white; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-excel { background-color: #1b5e20; color: white; width: 100%; margin-bottom: 15px; }
+        .btn-word { background-color: #0d47a1; color: white; width: 100%; }
 
-        /* الفوتر */
         .footer {
             text-align: center;
             padding: 15px;
@@ -285,7 +265,6 @@
             border-top: 1px solid #eee;
             color: var(--primary);
             font-weight: 600;
-            font-size: 0.95em;
             margin-top: auto;
             width: 100%;
             box-sizing: border-box;
@@ -302,8 +281,6 @@
             border-radius: 50px;
             display: none;
             z-index: 9999;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            font-weight: bold;
         }
     </style>
 </head>
@@ -313,15 +290,15 @@
     <div class="container">
         <div id="welcome-screen">
             <div class="logo-text">واثِق</div>
-            <h2 style="color:var(--text); margin-top:0;">إجراءات السلامة المهنية في الرعاية الصحية</h2>
+            <h2 style="color:var(--text); margin-top:0;">تقييم معارف طلاب قسم الأشعة حول جهاز السونار اللاسلكي</h2>
             
             <div class="input-group-start">
                 <label for="start-count">عدد العينات المستهدف:</label>
-                <input type="number" id="start-count" value="50" min="1">
+                <input type="number" id="start-count" value="30" min="1">
             </div>
 
             <button class="btn-start" onclick="startSurvey()">ابدأ المشروع</button>
-            <p style="color:#78909c; font-size:0.9em; margin-top:20px;">يتم حفظ تقدمك تلقائياً على هذا الجهاز</p>
+            <p style="color:#78909c; font-size:0.9em; margin-top:20px;">يتم الحفظ تلقائياً</p>
         </div>
 
         <div id="survey-view">
@@ -332,7 +309,7 @@
                 </div>
                 <div>
                     <span style="color:#78909c">من أصل:</span>
-                    <span id="total-display" style="font-weight:bold; font-size:1.1em; margin-right:5px;">50</span>
+                    <span id="total-display" style="font-weight:bold; font-size:1.1em; margin-right:5px;">30</span>
                 </div>
                 <button onclick="hardReset()" style="margin-right:auto; background:none; border:none; color:#b0bec5; cursor:pointer; font-family:'Cairo'"> إعادة ضبط ↻</button>
             </div>
@@ -350,8 +327,8 @@
 
         <div id="export-section">
             <span class="success-icon">✔</span>
-            <h2 style="color:var(--text)">تم إكمال جميع العينات!</h2>
-            <p style="color:#607d8b; margin-bottom:30px;">بياناتك جاهزة للتصدير بالصيغ المطلوبة</p>
+            <h2 style="color:var(--text)">تم إكمال الاستبيان بنجاح!</h2>
+            <p style="color:#607d8b; margin-bottom:30px;">بياناتك جاهزة للتصدير</p>
             
             <button class="btn btn-excel" onclick="exportExcel()">تحميل ملف Excel (.xlsx)</button>
             <button class="btn btn-word" onclick="exportWord()">تحميل ملف Word (.docx)</button>
@@ -370,67 +347,63 @@
 <div id="toast" class="toast">تم الحفظ بنجاح</div>
 
 <script>
-    // --- هيكلية الاستبيان (طبقا لملف PDF) ---
-    // الترميز: نعم = 0, لا = 1
-    
+    // --- هيكلية الاستبيان بناءً على الملف المرفق ---
     const structure = [
         {
-            title: "أولاً: المعلومات الديموغرافية",
+            title: "المعلومات الديموغرافية للطالب:",
+            type: "demo",
             qs: [
-                {t:"1. الجنس:", o:[{t:"ذكر",v:0}, {t:"أنثى",v:1}]}, // 0=ذكر, 1=انثى (أو حسب الترميز المفضل لك)
-                {t:"2. العمر:", o:[{t:"أقل من 25 سنة",v:0}, {t:"25-34 سنة",v:1}, {t:"35-44 سنة",v:2}, {t:"45 سنة فأكثر",v:3}]},
-                {t:"3. المستوى التعليمي:", o:[{t:"إعدادية",v:0}, {t:"دبلوم",v:1}, {t:"بكالوريوس",v:2}, {t:"دراسات عليا",v:3}]},
-                {t:"4. سنوات الخبرة:", o:[{t:"أقل من سنة",v:0}, {t:"1-5 سنوات",v:1}, {t:"6-10 سنوات",v:2}, {t:"11 سنة فأكثر",v:3}]},
-                {t:"5. هل شاركت سابقاً في دورات عن السلامة المهنية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
+                {t:"1- العمر (سنة):", type:"number"}, // تم تغييره لإدخال رقمي
+                {t:"2- الجنس:", type:"radio", o:[{t:"ذكر",v:0}, {t:"أنثى",v:1}]},
+                {t:"3- هل انت موظف:", type:"radio", o:[{t:"كلا",v:0}, {t:"نعم",v:1}]},
+                {t:"4- الحالة الزوجية:", type:"radio", o:[{t:"متزوج",v:0}, {t:"أعزب",v:1}, {t:"أرمل",v:2}, {t:"مطلق",v:3}, {t:"منفصل",v:4}]},
+                {t:"5- المرحلة الدراسية:", type:"radio", o:[{t:"المرحلة الثالثة",v:0}, {t:"المرحلة الرابعة",v:1}]},
+                {t:"6- بيئة السكن:", type:"radio", o:[{t:"حضر",v:0}, {t:"ريف",v:1}]},
+                {t:"7- الدخل الشهري للأسرة (بالدينار العراقي):", type:"radio", o:[
+                    {t:"أقل من 300.000",v:0}, {t:"300.000 - 600.000",v:1}, 
+                    {t:"601.000 - 900.000",v:2}, {t:"901.000 - 1.200.000",v:3}, 
+                    {t:"1.201.000 - 1.500.000",v:4}, {t:"1.501.000 أو أكثر",v:5}
+                ]}
             ]
         },
         {
-            title: "ثانياً: معارف الممرضين حول إجراءات السلامة المهنية",
+            title: "تقييم معارف الطلاب:",
+            type: "knowledge",
             qs: [
-                {t:"1. استخدام الكمامة ضروري عند التعامل مع الأمراض التنفسية المعدية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"2. غسل اليدين قبل وبعد التعامل مع المريض يقلل من انتقال العدوى", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"3. ارتداء القفازات ضروري عند التعامل مع سوائل جسم المريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"4. التخلص الآمن من الأدوات الحادة يتم بوضعها في حاويات مقاومة للثقب", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"5. هل إعادة تغطية الإبرة بعد الاستخدام يزيد من خطر الإصابة؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"6. يجب الإبلاغ فوراً عن أي إصابة بوخز الإبر داخل المؤسسة الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"7. التطعيم ضد التهاب الكبد B من إجراءات السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"8. التهوية الجيدة تقلل من مخاطر انتقال العدوى في المراكز الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"9. هل يوجد نظام خاص للتخلص من النفايات الطبية الخطرة في مكان عملك؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"10. هل التعرض المستمر للمواد الكيميائية قد يسبب مشاكل صحية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"11. هل الإجهاد البدني والنفسي يعتبر من مخاطر العمل التمريضي؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"12. هل لقاحات العاملين الصحيين جزء من إجراءات السلامة المهنية؟", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
-            ]
-        },
-        {
-            title: "ثالثاً: اتجاهات الممرضين نحو إجراءات السلامة المهنية",
-            qs: [
-                {t:"1. أرى أن الالتزام بتطبيق اجراءات السلامة يزيد من جودة الرعاية الصحية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"2. أعتقد أن السلامة المهنية جزء أساسي من أخلاقيات مهنة التمريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"3. أعتقد أن الإهمال في إجراءات السلامة يعرض المرضى للخطر", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"4. تتوفر في مركز عملي مستلزمات السلامة المهنية بشكل كاف", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"5. أحتاج إلى دورات تدريبية إضافية حول السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"6. إدارة المركز الصحي تشجع على الالتزام بإجراءات السلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"7. أعتقد أن إجراءات السلامة تقلل من الأخطاء المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"8. أرى أن التدريب المستمر يحسن الالتزام بالسلامة المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"9. أرى أن إجراءات السلامة المهنية تحمي الممرض والمريض", o:[{t:"نعم",v:0}, {t:"لا",v:1}]},
-                {t:"10. أشعر بالمسؤولية تجاه الإبلاغ عن الحوادث المهنية", o:[{t:"نعم",v:0}, {t:"لا",v:1}]}
+                {t:"1- يساعد تكرار الفحص بالسونار في متابعة تطور حالة النزيف الطحالي", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"2- يُغني السونار عن التصوير بالمفراس الحلزوني في المرضى المصابين بإصابات صدرية معقدة", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"3- يكشف السونار جميع درجات التمزق الكبدي وطحال مقارنة بالتصوير بالمفراس الحلزوني", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"4- للسونار دور في تقييم إصابات الرأس في الطوارئ", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"5- السونار مفيد كفحص أولي في تقييم إصابات الكلى في قسم الطوارئ", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"6- تكون وضعية الجهاز محددة اثناء فحص المريض", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"7- يساعد السونار في اتخاذ قرار التدخل الجراحي العاجل للحالات الحرجة", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"8- يمكن استخدام فحص FAST لتقييم إصابات الكبد بسرعة في الطوارئ", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"9- يُسهم التشخيص المبكر باستخدام السونار في تقليل نسبة الوفيات في مرضى حوادث العامة بشكل قليل", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"10- استخدام جهاز سونار محمول لاسلكي قد يقلل زمن الاستجابة في أقسام الطوارئ", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"11- الفحص الديناميكي المتكرر يزيد من احتمالية اكتشاف النزيف المتأخر", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"12- يُظهر السونار كفاءة مشابهة للأشعة السينية (Chest X-ray) في كشف الاسترواح الصدري المبكر", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"13- يمكن إجراء فحص بالسونار خلال دقائق دون الحاجة إلى نقل المريض من سرير الطوارئ", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"14- للسونار دور في تشخيص كسور العظام الطويلة اثناء الاصابة بحوادث عامة", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"15- سهولة نقل جهاز السونار المحمول تسهم في تسريع التقييم الأولي بشكل بسيط", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"16- يُعد السونار المحمول وسيلة آمنة من حيث عدم التعرض للإشعاع مقارنةً بـ CT", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"17- أي شخص يعمل في قسم الاشعة يستطيع العمل على جهاز السونار اللاسلكي المحمول", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"18- الكبد من أكثر الأعضاء تعرضًا للإصابة في حوادث المرور والرضوض البطنية فيحتاج جهاز السونار اللاسلكي المحمول ضروري", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"19- تكون بعض إصابات الكبد غير واضحة في المراحل المبكرة عند الفحص بجهاز السونار اللاسلكي المحمول", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]},
+                {t:"20- الطحال من أكثر الأعضاء عرضة للتمزق في الرضوض البطنية في حوادث العامة", type:"radio", o:[{t:"أعرف",v:0}, {t:"غير متأكد",v:1}, {t:"لا أعرف",v:2}]}
             ]
         }
     ];
 
     let appState = {
-        target: 50,
+        target: 30,
         currentIdx: 0,
         data: []
     };
 
-    // --- المنطق البرمجي ---
-
     window.onload = function() {
-        const saved = localStorage.getItem('wathiq_safety_v2');
+        const saved = localStorage.getItem('wathiq_radiology_v1');
         if (saved) {
             appState = JSON.parse(saved);
-            // التأكد من أن العدد الافتراضي محدث
             document.getElementById('start-count').value = appState.target;
             showSurveyInterface();
         }
@@ -441,7 +414,6 @@
         const count = parseInt(countInput);
         if (count && count > 0) {
             appState.target = count;
-            // ملء المصفوفة إذا كانت فارغة أو توسيعها
             if (appState.data.length < count) {
                 for(let i=appState.data.length; i<count; i++) appState.data.push({});
             }
@@ -468,7 +440,8 @@
         structure.forEach((section) => {
             const secDiv = document.createElement('div');
             secDiv.innerHTML = `<div class="section-title">${section.title}</div>`;
-            
+            const gridClass = section.type === 'knowledge' ? 'options-grid horizontal-mode' : 'options-grid';
+
             section.qs.forEach((q) => {
                 const qKey = `q${globalQIndex}`;
                 const qBlock = document.createElement('div');
@@ -476,23 +449,27 @@
                 qBlock.id = `block_${qKey}`;
 
                 let optionsHTML = '';
-                q.o.forEach((opt) => {
-                    // استرجاع القيمة المحفوظة
-                    const savedVal = appState.data[appState.currentIdx] ? appState.data[appState.currentIdx][qKey] : undefined;
-                    // مقارنة القيم للتحديد
-                    const isChecked = (savedVal == opt.v) ? 'checked' : '';
+                const savedVal = appState.data[appState.currentIdx] ? appState.data[appState.currentIdx][qKey] : '';
 
-                    optionsHTML += `
-                        <label>
-                            <input type="radio" name="${qKey}" value="${opt.v}" ${isChecked} onchange="autoSaveField('${qKey}', ${opt.v})">
-                            ${opt.t}
-                        </label>
-                    `;
-                });
+                if (q.type === 'number') {
+                    // حقل إدخال الأرقام (العمر)
+                    optionsHTML = `<input type="number" class="number-input" name="${qKey}" value="${savedVal !== undefined ? savedVal : ''}" oninput="autoSaveField('${qKey}', this.value)" placeholder="أدخل العمر">`;
+                } else {
+                    // خيارات الراديو
+                    q.o.forEach((opt) => {
+                        const isChecked = (savedVal !== '' && savedVal == opt.v) ? 'checked' : '';
+                        optionsHTML += `
+                            <label>
+                                <input type="radio" name="${qKey}" value="${opt.v}" ${isChecked} onchange="autoSaveField('${qKey}', ${opt.v})">
+                                ${opt.t}
+                            </label>
+                        `;
+                    });
+                }
 
                 qBlock.innerHTML = `
                     <span class="q-text">${q.t}</span>
-                    <div class="options-grid">${optionsHTML}</div>
+                    <div class="${gridClass}">${optionsHTML}</div>
                 `;
                 secDiv.appendChild(qBlock);
                 globalQIndex++;
@@ -536,14 +513,15 @@
 
     function validateCurrentSample() {
         const currentData = appState.data[appState.currentIdx] || {};
-        let totalQuestions = 27; // 5 Demo + 12 Knowledge + 10 Attitudes
+        let totalQuestions = 27; // 7 ديموغرافية + 20 معارف
         let firstMissing = null;
 
         document.querySelectorAll('.question-block').forEach(b => b.classList.remove('unanswered'));
 
         for (let i = 1; i <= totalQuestions; i++) {
             const key = `q${i}`;
-            if (currentData[key] === undefined) {
+            const val = currentData[key];
+            if (val === undefined || val === '') {
                 const block = document.getElementById(`block_${key}`);
                 block.classList.add('unanswered');
                 if (!firstMissing) firstMissing = block;
@@ -565,10 +543,10 @@
         const nextBtn = document.getElementById('btn-next');
         if (appState.currentIdx === appState.target - 1) {
             nextBtn.innerText = "إنهاء وتصدير";
-            nextBtn.style.backgroundColor = "#2e7d32"; // أخضر
+            nextBtn.style.backgroundColor = "#2e7d32";
         } else {
             nextBtn.innerText = "التالي وحفظ";
-            nextBtn.style.backgroundColor = ""; // استعادة اللون الأصلي
+            nextBtn.style.backgroundColor = ""; 
         }
     }
 
@@ -581,12 +559,12 @@
     }
 
     function saveState() {
-        localStorage.setItem('wathiq_safety_v2', JSON.stringify(appState));
+        localStorage.setItem('wathiq_radiology_v1', JSON.stringify(appState));
     }
 
     function hardReset() {
-        if(confirm("تحذير: سيتم حذف جميع البيانات والبدء من جديد. هل أنت متأكد؟")) {
-            localStorage.removeItem('wathiq_safety_v2');
+        if(confirm("تحذير: سيتم حذف جميع البيانات! هل أنت متأكد؟")) {
+            localStorage.removeItem('wathiq_radiology_v1');
             location.reload();
         }
     }
@@ -609,16 +587,9 @@
         document.getElementById('export-section').style.display = 'none';
     }
 
-    function prepareData(useText = true) {
-        // useText: إذا true يصدر النص (نعم/لا)، إذا false يصدر الأرقام (0/1)
-        // طلبك الأول كان ترميز رقمي، سأجعل الافتراضي رقمي للأعمدة
-        
+    function prepareData() {
         return appState.data.slice(0, appState.target).map((item, idx) => {
             let row = { 'ID': idx + 1 };
-            
-            // نحتاج لربط القيم الرقمية بالنصوص للتصدير النصي إذا احتجنا
-            // لكن هنا سنصدر القيم كما خُزنت (0 و 1)
-            
             for(let i=1; i<=27; i++) {
                 row[`Q${i}`] = (item[`q${i}`] !== undefined) ? item[`q${i}`] : ''; 
             }
@@ -629,27 +600,22 @@
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(prepareData());
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Safety_Data");
-        XLSX.writeFile(wb, "Safety_Survey_Data.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Radiology_Data");
+        XLSX.writeFile(wb, "Radiology_Survey.xlsx");
     }
 
     function exportWord() {
         const data = prepareData();
-        let html = `<h2 style='text-align:center; font-family:Arial'>بيانات استبيان السلامة المهنية</h2>`;
+        let html = `<h2 style='text-align:center; font-family:Arial'>بيانات استبيان طلاب الأشعة</h2>`;
         html += `<table border="1" style="border-collapse: collapse; text-align: center; width:100%; direction:rtl; font-family:Arial;">`;
         
-        // الهيدر
         html += `<tr style="background:#eee;"><th>ت</th>`;
         for(let i=1; i<=27; i++) html += `<th>س${i}</th>`;
         html += `</tr>`;
         
-        // البيانات
         data.forEach(row => {
             html += `<tr><td>${row['ID']}</td>`;
-            for(let i=1; i<=27; i++) {
-                // القيم ستظهر 0 أو 1
-                html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
-            }
+            for(let i=1; i<=27; i++) html += `<td>${row[`Q${i}`] !== '' ? row[`Q${i}`] : '-'}</td>`;
             html += `</tr>`;
         });
         html += `</table>`;
@@ -658,7 +624,7 @@
         const blob = new Blob(['\ufeff', `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>${html}</body></html>`], {type: 'application/msword'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'Safety_Survey_Data.doc';
+        link.download = 'Radiology_Survey.doc';
         link.click();
     }
 </script>
